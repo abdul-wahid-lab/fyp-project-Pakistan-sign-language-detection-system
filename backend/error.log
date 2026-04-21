@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "D:\4-2026\backend\main.py", line 6, in <module>
+    from routers import capture, recognition, speech
+  File "D:\4-2026\backend\routers\recognition.py", line 6, in <module>
+    from services import recognition_service, speech_service
+  File "D:\4-2026\backend\services\recognition_service.py", line 16, in <module>
+    def get_latest_keypoint_file() -> str | None:
+TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
+unsupported operand type(s) for |: 'type' and 'NoneType'
