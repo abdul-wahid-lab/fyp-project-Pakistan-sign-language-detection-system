@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  background: #000;
+  color: #fff;
+}
+
+/* ── Dark theme button ─────────────────────────────────────────────────────── */
+.psl-btn {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  height: 46px;
+  min-width: 160px;
+  text-align: center;
+  border-radius: 6px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.01em;
+}
+
+.psl-btn:hover { background: #e2e2e2; }
+
+.psl-btn.danger {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.psl-btn.danger:hover { background: rgba(255,255,255,0.08); }
+
+.psl-btn.accent {
+  background: #fb397d;
+  color: #fff;
+}
+.psl-btn.accent:hover { background: #e02c6d; }
+
+/* ── Dark card ─────────────────────────────────────────────────────────────── */
+.dark-card {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+/* ── Dot accent ────────────────────────────────────────────────────────────── */
+.dot-accent {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fb397d;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ── Watermark (kept for possible reuse) ───────────────────────────────────── */
+.watermark {
+  font-size: clamp(80px, 18vw, 332px);
+  position: absolute;
+  font-weight: 900;
+  left: -12px;
+  top: -80px;
+  z-index: 0;
+  color: #fff;
+  opacity: 0.03;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+/* ── Feed container ────────────────────────────────────────────────────────── */
+.feed-box {
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.feed-box .feed-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  z-index: 2;
+}
+
+.feed-box .live-dot {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fb397d;
+  z-index: 2;
+}
+
+.feed-box .live-dot::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fb397d;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Pill badge ────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.04);
+}
+
+/* ── Toggle switch ─────────────────────────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.toggle-row label {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+.toggle {
+  appearance: none;
+  width: 40px;
+  height: 22px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.toggle:checked {
+  background: #fb397d;
+}
+
+.toggle:checked::after {
+  transform: translateX(18px);
+}
