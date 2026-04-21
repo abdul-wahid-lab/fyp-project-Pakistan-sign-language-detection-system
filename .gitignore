@@ -31,6 +31,8 @@ backend/data/db/
 *.suo
 *.user
 .claude/
+CLAUDE.md
+AGENTS.md
 
 # ── Next.js / Node ───────────────────────────────────────────────────────────
 frontend/node_modules/
