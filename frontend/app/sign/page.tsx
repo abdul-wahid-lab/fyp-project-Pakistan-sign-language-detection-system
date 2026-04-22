@@ -9,7 +9,7 @@ export default function SignPage() {
   const [speech, setSpeech] = useState(false);
   const [wordMode, setWordMode] = useState(false);
   const [detecting, setDetecting] = useState(false);
-  const [cooldown, setCooldown] = useState(1000);
+  const cooldown = 1000;
   const [currentLetter, setCurrentLetter] = useState("");
   const [currentWord, setCurrentWord] = useState("");
   const [sentence, setSentence] = useState<string[]>([]);
@@ -59,25 +59,18 @@ export default function SignPage() {
   async function speakWord(word: string) {
     if (!word) return;
     const url = `http://127.0.0.1:8000/audio/${encodeURIComponent(word)}.mp3`;
-    try {
-      const res = await fetch(url, { method: "HEAD" });
-      if (res.ok) {
-        await new Promise<void>(resolve => {
-          const audio = new Audio(url);
-          audio.onended = () => resolve();
-          audio.onerror = () => resolve();
-          audio.play().catch(() => resolve());
-        });
-        return;
-      }
-    } catch {}
     await new Promise<void>(resolve => {
-      if (!window.speechSynthesis) { resolve(); return; }
-      const utt = new SpeechSynthesisUtterance(word);
-      utt.lang = "ur-PK";
-      utt.onend = () => resolve();
-      utt.onerror = () => resolve();
-      window.speechSynthesis.speak(utt);
+      const audio = new Audio(url);
+      audio.onended = () => resolve();
+      audio.onerror = () => {
+        fetch(`${API}/log-missing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ word }),
+        }).catch(() => {});
+        resolve();
+      };
+      audio.play().catch(() => resolve());
     });
   }
 
@@ -90,7 +83,6 @@ export default function SignPage() {
   function addWord() {
     if (!currentWord) return;
     setSentence(prev => [...prev, currentWord]);
-    speakWord(currentWord);
     setCurrentWord("");
     setCurrentLetter("");
     lastLetterRef.current = "";
@@ -169,22 +161,6 @@ export default function SignPage() {
             </div>
           </div>
 
-          {/* Cooldown slider */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Detection Speed</span>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{cooldown}ms</span>
-            </div>
-            <input
-              type="range" min={300} max={3000} step={100} value={cooldown}
-              onChange={e => setCooldown(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#fb397d', cursor: 'pointer' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>
-              <span>Fast (300ms)</span>
-              <span>Slow (3s)</span>
-            </div>
-          </div>
 
           {/* Current Letter */}
           <div className="flex flex-col gap-2">
@@ -197,14 +173,21 @@ export default function SignPage() {
             <button
               onClick={acceptLetter}
               disabled={!currentLetter}
-              style={{
-                width: '100%', height: 40, borderRadius: 6, border: 'none', fontWeight: 600, fontSize: 13,
-                cursor: currentLetter ? 'pointer' : 'not-allowed',
-                background: currentLetter ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
-                color: currentLetter ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
-                transition: 'background 0.2s',
-              }}>
+              className="psl-btn"
+              style={{ width: '100%', height: 50, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
               Accept Letter
+            </button>
+            <button
+              onClick={() => {
+                if (!currentLetter) return;
+                setSentence(prev => [...prev, currentLetter]);
+                setCurrentLetter("");
+                lastLetterRef.current = "";
+              }}
+              disabled={!currentLetter}
+              className="psl-btn"
+              style={{ width: '100%', height: 50, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
+              Add Letter to Sentence
             </button>
           </div>
 
@@ -228,12 +211,8 @@ export default function SignPage() {
             <button
               onClick={addWord}
               disabled={!currentWord}
-              style={{
-                width: '100%', height: 46, borderRadius: 6, border: 'none', fontWeight: 600, fontSize: 14, cursor: currentWord ? 'pointer' : 'not-allowed',
-                background: currentWord ? '#fb397d' : 'rgba(255,255,255,0.06)',
-                color: currentWord ? '#fff' : 'rgba(255,255,255,0.25)',
-                transition: 'background 0.2s',
-              }}>
+              className="psl-btn"
+              style={{ width: '100%', height: 50, opacity: currentWord ? 1 : 0.3, cursor: currentWord ? 'pointer' : 'not-allowed' }}>
               Add Word to Sentence
             </button>
           </div>
@@ -284,39 +263,16 @@ export default function SignPage() {
             <button
               onClick={() => speakSentence(sentence)}
               disabled={sentence.length === 0}
-              style={{
-                width: '100%', height: 40, borderRadius: 6, border: 'none', fontWeight: 600, fontSize: 13,
-                cursor: sentence.length > 0 ? 'pointer' : 'not-allowed',
-                background: sentence.length > 0 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
-                color: sentence.length > 0 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
-                transition: 'background 0.2s',
-              }}>
+              className="psl-btn"
+              style={{ width: '100%', height: 50, opacity: sentence.length > 0 ? 1 : 0.3, cursor: sentence.length > 0 ? 'pointer' : 'not-allowed' }}>
               Speak Sentence
             </button>
           </div>
 
-          {/* Test speech */}
-          <button onClick={() => speakSentence(["عبدالواحد"])}
-            style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 12px', cursor: 'pointer' }}>
-            Test Speech
-          </button>
-
-          {/* Start / Stop */}
-          <div>
-            {!detecting ? (
-              <button onClick={startDetection} className="psl-btn" style={{ width: '100%', height: 50 }}>
-                Start Detection
-              </button>
-            ) : (
-              <button onClick={handleStop} className="psl-btn danger" style={{ width: '100%', height: 50 }}>
-                Stop Detection
-              </button>
-            )}
-          </div>
         </div>
 
         {/* ── RIGHT: Camera feed ──────────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-black">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black gap-4">
           <div className="feed-box w-full" style={{ maxWidth: 720, aspectRatio: '4/3' }}>
             <span className="feed-label">Camera Feed</span>
             {detecting && (
@@ -340,6 +296,19 @@ export default function SignPage() {
                 <span style={{ fontSize: 13, letterSpacing: '0.05em' }}>Camera inactive</span>
                 <span style={{ fontSize: 11, opacity: 0.6 }}>Press Start Detection to begin</span>
               </div>
+            )}
+          </div>
+
+          {/* Start / Stop */}
+          <div style={{ width: '100%', maxWidth: 720 }}>
+            {!detecting ? (
+              <button onClick={startDetection} className="psl-btn" style={{ width: '100%', height: 50 }}>
+                Start Detection
+              </button>
+            ) : (
+              <button onClick={handleStop} className="psl-btn danger" style={{ width: '100%', height: 50 }}>
+                Stop Detection
+              </button>
             )}
           </div>
         </div>

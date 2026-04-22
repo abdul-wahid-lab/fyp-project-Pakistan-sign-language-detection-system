@@ -34,22 +34,38 @@ export default function ChromaKeyVideo({ maxHeight = 500 }: { maxHeight?: number
       canvas.width = vw;
       canvas.height = vh;
       setSize({ w: Math.round(vw * scale), h: maxHeight });
-      video.play();
+      video.play().catch(() => {});
+    }
+
+    function onPlay() {
+      cancelAnimationFrame(rafRef.current);
+      processFrame();
     }
 
     video.addEventListener("loadedmetadata", onLoaded);
-    video.addEventListener("play", processFrame);
+    video.addEventListener("play", onPlay);
+
+    if (video.readyState >= 1) onLoaded();
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       video.removeEventListener("loadedmetadata", onLoaded);
-      video.removeEventListener("play", processFrame);
+      video.removeEventListener("play", onPlay);
     };
   }, [maxHeight]);
 
   return (
     <>
-      <video ref={videoRef} src="/bg.mp4" muted loop playsInline preload="auto" style={{ display: "none" }} />
+      <video
+        ref={videoRef}
+        src="/bg.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        style={{ display: "none" }}
+      />
       <canvas
         ref={canvasRef}
         style={{
