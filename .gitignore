@@ -24,6 +24,7 @@ backend/data/guide_labeled/
 backend/data/datasets/
 backend/data/psl_keypoints/
 backend/data/db/
+backend/Keypoints/
 
 # ── Editor & IDE ─────────────────────────────────────────────────────────────
 .vscode/

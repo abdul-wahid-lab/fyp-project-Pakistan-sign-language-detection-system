@@ -4,7 +4,7 @@ import ChromaKeyVideo from "./components/ChromaKeyVideo";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black flex flex-col" style={{ position: 'relative' }}>
+    <main className="bg-black flex flex-col" style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
 
       {/* Nav */}
       <nav style={{
@@ -22,32 +22,32 @@ export default function Home() {
       </nav>
 
       {/* Hero — two column */}
-      <div style={{
-        flex: 1, display: 'flex', alignItems: 'center',
-        padding: '60px 48px', gap: 64, maxWidth: 1280, margin: '0 auto', width: '100%',
-      }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'stretch', width: '100%' }}>
 
         {/* LEFT: Text */}
-        <div style={{ flex: '0 0 480px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <div style={{
+          flex: '0 0 50%', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', gap: 32, padding: '60px 64px',
+        }}>
           <h1 style={{
-            fontSize: 'clamp(42px, 5vw, 72px)', fontWeight: 800,
-            color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: 0,
+            fontSize: 'clamp(36px, 4vw, 62px)', fontWeight: 800,
+            color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0,
           }}>
-            Pakistan<br />
-            <span style={{ color: 'rgba(255,255,255,0.25)' }}>Sign Language</span><br />
+            Pakistan{' '}
+            <span style={{ color: 'rgba(255,255,255,0.25)' }}>Sign Language</span>{' '}
             Detection
           </h1>
 
           <p style={{
             fontSize: 16, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75,
-            maxWidth: 420, margin: 0,
+            maxWidth: 460, margin: 0,
           }}>
             Detect PSL gestures in real-time using your webcam.
             Powered by MediaPipe and machine learning — translate
             hand signs into text instantly.
           </p>
 
-          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 12 }}>
             <Link href="/sign">
               <button className="psl-btn" style={{ height: 50, minWidth: 170, fontSize: 14 }}>
                 Start Detection
@@ -68,7 +68,7 @@ export default function Home() {
           </div>
 
           {/* Stats row */}
-          <div style={{ display: 'flex', gap: 36, marginTop: 16 }}>
+          <div style={{ display: 'flex', gap: 48 }}>
             {[['38', 'Letters'], ['Real-time', 'Detection'], ['Urdu', 'Speech Output']].map(([val, label]) => (
               <div key={label}>
                 <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{val}</div>
@@ -79,8 +79,11 @@ export default function Home() {
         </div>
 
         {/* RIGHT: Video */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ChromaKeyVideo maxHeight={500} />
+        <div style={{
+          flex: '0 0 50%', display: 'flex', alignItems: 'flex-end',
+          justifyContent: 'center', overflow: 'hidden', background: '#000',
+        }}>
+          <ChromaKeyVideo maxHeight={680} />
         </div>
 
       </div>
