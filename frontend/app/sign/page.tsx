@@ -177,18 +177,6 @@ export default function SignPage() {
               style={{ width: '100%', height: 50, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
               Accept Letter
             </button>
-            <button
-              onClick={() => {
-                if (!currentLetter) return;
-                setSentence(prev => [...prev, currentLetter]);
-                setCurrentLetter("");
-                lastLetterRef.current = "";
-              }}
-              disabled={!currentLetter}
-              className="psl-btn"
-              style={{ width: '100%', height: 50, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
-              Add Letter to Sentence
-            </button>
           </div>
 
           {/* Current Word being built */}

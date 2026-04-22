@@ -43,7 +43,7 @@ export default function Home() {
             maxWidth: 460, margin: 0,
           }}>
             Detect PSL gestures in real-time using your webcam.
-            Powered by MediaPipe and machine learning — translate
+            Powered by MediaPipe and machine learning translate
             hand signs into text instantly.
           </p>
 
@@ -69,7 +69,7 @@ export default function Home() {
 
           {/* Stats row */}
           <div style={{ display: 'flex', gap: 48 }}>
-            {[['38', 'Letters'], ['Real-time', 'Detection'], ['Urdu', 'Speech Output']].map(([val, label]) => (
+            {[['38', 'Letters'], ['6', 'Words'], ['Real-time', 'Detection'], ['Urdu', 'Speech Output']].map(([val, label]) => (
               <div key={label}>
                 <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{val}</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{label}</div>
