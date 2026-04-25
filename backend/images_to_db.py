@@ -141,7 +141,7 @@ def process_dataset(dataset_path, db_path, clear_existing):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", required=True,
+    parser.add_argument("--dataset", default="C:\\path\\to\\your\\dataset",
                         help="Path to image dataset (subfolders = labels)")
     parser.add_argument("--db", default=DB_PATH,
                         help=f"SQLite database path (default: {DB_PATH})")
