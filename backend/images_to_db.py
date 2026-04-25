@@ -90,6 +90,7 @@ def ensure_table(conn):
 
 
 def process_dataset(dataset_path, db_path, clear_existing):
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     conn = sqlite3.connect(db_path)
     ensure_table(conn)
 
