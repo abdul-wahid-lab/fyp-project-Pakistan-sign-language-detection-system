@@ -16,8 +16,16 @@ export default function Home() {
           <span className="dot-accent" />
           <span style={{ fontWeight: 700, color: '#fff', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 32, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-          <span>Pakistan Sign Language</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
+          <Link href="/about" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'}
+          >About Us</Link>
+          <Link href="/contact" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'}
+          >Contact Us</Link>
+          <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pakistan Sign Language</span>
         </div>
       </nav>
 
@@ -53,7 +61,7 @@ export default function Home() {
                 Start Detection
               </button>
             </Link>
-            <a href="#learn" style={{
+            <Link href="/learn" style={{
               height: 50, minWidth: 140, fontSize: 14, fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8,
@@ -64,7 +72,7 @@ export default function Home() {
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.12)'; }}
             >
               Learn Signs
-            </a>
+            </Link>
           </div>
 
           {/* Stats row */}
