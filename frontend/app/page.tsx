@@ -1,31 +1,41 @@
 "use client";
 import Link from "next/link";
 import ChromaKeyVideo from "./components/ChromaKeyVideo";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 export default function Home() {
   return (
-    <main className="bg-black flex flex-col" style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+    <main style={{ background: 'var(--bg)', display: 'flex', flexDirection: 'column', position: 'relative', height: '100vh', overflow: 'hidden' }}>
 
       {/* Nav */}
       <nav style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '20px 48px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)',
         position: 'relative', zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="dot-accent" />
-          <span style={{ fontWeight: 700, color: '#fff', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+          <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
-          <Link href="/about" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'}
+          <Link href="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
           >About Us</Link>
-          <Link href="/contact" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'}
+          <Link href="/contact" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
           >Contact Us</Link>
-          <span style={{ color: 'rgba(255,255,255,0.2)' }}>Pakistan Sign Language</span>
+          <Link href="/feedback" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+          >Feedback</Link>
+          <Link href="/dictionary" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+          >Dictionary</Link>
+          <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -39,15 +49,15 @@ export default function Home() {
         }}>
           <h1 style={{
             fontSize: 'clamp(36px, 4vw, 62px)', fontWeight: 800,
-            color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0,
+            color: 'var(--text)', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0,
           }}>
             Pakistan{' '}
-            <span style={{ color: 'rgba(255,255,255,0.25)' }}>Sign Language</span>{' '}
+            <span style={{ color: 'var(--text-faint)' }}>Sign Language</span>{' '}
             Detection
           </h1>
 
           <p style={{
-            fontSize: 16, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75,
+            fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.75,
             maxWidth: 460, margin: 0,
           }}>
             Detect PSL gestures in real-time using your webcam.
@@ -64,12 +74,23 @@ export default function Home() {
             <Link href="/learn" style={{
               height: 50, minWidth: 140, fontSize: 14, fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8,
-              color: 'rgba(255,255,255,0.5)', cursor: 'pointer', textDecoration: 'none',
-              transition: 'border-color 0.2s, color 0.2s',
+              border: '1px solid var(--text-faint)', borderRadius: 8,
+              color: 'var(--text)', cursor: 'pointer', textDecoration: 'none',
+              background: 'transparent',
+              transition: 'background 0.2s, color 0.2s, border-color 0.2s',
             }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.3)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.12)'; }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = 'var(--text)';
+                el.style.color = 'var(--bg)';
+                el.style.borderColor = 'var(--text)';
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = 'transparent';
+                el.style.color = 'var(--text)';
+                el.style.borderColor = 'var(--text-faint)';
+              }}
             >
               Learn Signs
             </Link>
@@ -79,8 +100,8 @@ export default function Home() {
           <div style={{ display: 'flex', gap: 48 }}>
             {[['38', 'Letters'], ['6', 'Words'], ['Real-time', 'Detection'], ['Urdu', 'Speech Output']].map(([val, label]) => (
               <div key={label}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{val}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{label}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em' }}>{val}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-sub)', marginTop: 2 }}>{label}</div>
               </div>
             ))}
           </div>
@@ -89,7 +110,7 @@ export default function Home() {
         {/* RIGHT: Video */}
         <div style={{
           flex: '0 0 50%', display: 'flex', alignItems: 'flex-end',
-          justifyContent: 'center', overflow: 'hidden', background: '#000',
+          justifyContent: 'center', overflow: 'hidden', background: 'var(--bg)',
         }}>
           <ChromaKeyVideo maxHeight={680} />
         </div>
@@ -98,9 +119,9 @@ export default function Home() {
 
       {/* Footer */}
       <div style={{
-        padding: '18px 48px', borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '18px 48px', borderTop: '1px solid var(--border-subtle)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: 12, color: 'rgba(255,255,255,0.2)',
+        fontSize: 12, color: 'var(--text-faint)',
       }}>
         <span>PSL · Pakistan Sign Language System</span>
         <span>MediaPipe · Next.js · FastAPI</span>

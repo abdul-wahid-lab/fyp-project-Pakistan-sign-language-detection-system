@@ -2,20 +2,51 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ── Theme variables ───────────────────────────────────────────────────── */
+:root {
+  --bg: #000;
+  --bg-card: #111;
+  --bg-secondary: #0a0a0a;
+  --text: #fff;
+  --text-muted: rgba(255,255,255,0.45);
+  --text-sub: rgba(255,255,255,0.3);
+  --text-faint: rgba(255,255,255,0.2);
+  --text-ghost: rgba(255,255,255,0.15);
+  --border-subtle: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.08);
+  --border-medium: rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.3);
+}
+
+[data-theme="light"] {
+  --bg: #f4f4f5;
+  --bg-card: #ffffff;
+  --bg-secondary: #e4e4e7;
+  --text: #09090b;
+  --text-muted: rgba(0,0,0,0.55);
+  --text-sub: rgba(0,0,0,0.45);
+  --text-faint: rgba(0,0,0,0.3);
+  --text-ghost: rgba(0,0,0,0.15);
+  --border-subtle: rgba(0,0,0,0.06);
+  --border: rgba(0,0,0,0.08);
+  --border-medium: rgba(0,0,0,0.12);
+  --border-strong: rgba(0,0,0,0.3);
+}
+
 body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   overflow-x: hidden;
-  background: #000;
-  color: #fff;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* ── Dark theme button ─────────────────────────────────────────────────────── */
+/* ── Button ────────────────────────────────────────────────────────────── */
 .psl-btn {
-  background: #fff;
-  color: #000;
+  background: var(--text);
+  color: var(--bg);
   font-weight: 600;
   font-size: 14px;
-  border: none;
+  border: 1px solid transparent;
   height: 46px;
   min-width: 160px;
   text-align: center;
@@ -29,30 +60,28 @@ body {
   letter-spacing: 0.01em;
 }
 
-.psl-btn:hover { background: #e2e2e2; }
+.psl-btn:hover { background: var(--bg); color: var(--text); border-color: var(--text-faint); }
+[data-theme="light"] .psl-btn:hover { background: #fff; color: #000; border-color: var(--text-faint); }
 
 .psl-btn.danger {
   background: transparent;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text);
+  border: 1px solid var(--border-medium);
 }
-.psl-btn.danger:hover { background: rgba(255,255,255,0.08); }
+.psl-btn.danger:hover { background: var(--border); }
 
-.psl-btn.accent {
-  background: #fb397d;
-  color: #fff;
-}
-.psl-btn.accent:hover { background: #e02c6d; }
+.psl-btn.accent { background: #fb397d; color: #fff; }
+.psl-btn.accent:hover { background: #e02c6d; opacity: 1; }
 
-/* ── Dark card ─────────────────────────────────────────────────────────────── */
+/* ── Dark card ─────────────────────────────────────────────────────────── */
 .dark-card {
-  background: #111;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 24px;
 }
 
-/* ── Dot accent ────────────────────────────────────────────────────────────── */
+/* ── Dot accent ────────────────────────────────────────────────────────── */
 .dot-accent {
   display: inline-block;
   width: 8px;
@@ -63,7 +92,7 @@ body {
   vertical-align: middle;
 }
 
-/* ── Watermark (kept for possible reuse) ───────────────────────────────────── */
+/* ── Watermark ─────────────────────────────────────────────────────────── */
 .watermark {
   font-size: clamp(80px, 18vw, 332px);
   position: absolute;
@@ -71,17 +100,17 @@ body {
   left: -12px;
   top: -80px;
   z-index: 0;
-  color: #fff;
+  color: var(--text);
   opacity: 0.03;
   pointer-events: none;
   user-select: none;
   line-height: 1;
 }
 
-/* ── Feed container ────────────────────────────────────────────────────────── */
+/* ── Feed container ────────────────────────────────────────────────────── */
 .feed-box {
-  background: #0a0a0a;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -95,7 +124,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-muted);
   z-index: 2;
 }
 
@@ -108,7 +137,6 @@ body {
   gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
   color: #fb397d;
   z-index: 2;
 }
@@ -128,7 +156,7 @@ body {
   50% { opacity: 0.3; }
 }
 
-/* ── Pill badge ────────────────────────────────────────────────────────────── */
+/* ── Pill badge ────────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -137,30 +165,30 @@ body {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.6);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  background: var(--border-subtle);
 }
 
-/* ── Toggle switch ─────────────────────────────────────────────────────────── */
+/* ── Toggle switch ─────────────────────────────────────────────────────── */
 .toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .toggle-row label {
   font-size: 14px;
-  color: rgba(255,255,255,0.8);
+  color: var(--text-muted);
 }
 
 .toggle {
   appearance: none;
   width: 40px;
   height: 22px;
-  background: rgba(255,255,255,0.12);
+  background: var(--border-medium);
   border-radius: 999px;
   cursor: pointer;
   position: relative;
@@ -178,12 +206,15 @@ body {
   border-radius: 50%;
   background: #fff;
   transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 
-.toggle:checked {
-  background: #fb397d;
-}
+.toggle:checked { background: #fb397d; }
+.toggle:checked::after { transform: translateX(18px); }
 
-.toggle:checked::after {
-  transform: translateX(18px);
-}
+/* ── Tailwind overrides for light theme ────────────────────────────────── */
+[data-theme="light"] .bg-black { background-color: var(--bg) !important; }
+[data-theme="light"] .text-white { color: var(--text) !important; }
+[data-theme="light"] .text-white\/30,
+[data-theme="light"] .text-white\/40 { color: var(--text-muted) !important; }
+[data-theme="light"] .border-white\/8 { border-color: var(--border) !important; }
