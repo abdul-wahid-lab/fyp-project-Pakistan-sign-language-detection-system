@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 const API = "http://127.0.0.1:8000/api";
 
@@ -75,9 +76,7 @@ export default function SignPage() {
   }
 
   async function speakSentence(words: string[]) {
-    for (const word of words) {
-      await speakWord(word);
-    }
+    for (const word of words) await speakWord(word);
   }
 
   function addWord() {
@@ -113,30 +112,36 @@ export default function SignPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       {/* Nav */}
-      <nav className="flex items-center justify-between px-10 py-5 border-b border-white/8">
-        <Link href="/" className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm">
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+        >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Back
         </Link>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="dot-accent" />
-          <span className="font-bold text-white tracking-tight">Sign Detection</span>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>Sign Detection</span>
         </div>
-        <div className="badge">Pakistan Sign Language</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="badge">Pakistan Sign Language</div>
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Body */}
-      <div className="flex flex-1 gap-0 overflow-hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-        {/* ── LEFT: Controls ───────────────────────────────────────────────── */}
-        <div className="w-[400px] flex-shrink-0 flex flex-col gap-5 p-8 border-r border-white/8 overflow-y-auto">
+        {/* LEFT: Controls */}
+        <div style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
 
           {/* Status */}
-          <div className="flex items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {detecting ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#fb397d', fontWeight: 600 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fb397d', display: 'inline-block', animation: 'pulse-dot 1.5s ease-in-out infinite' }} />
@@ -149,77 +154,62 @@ export default function SignPage() {
 
           {/* Toggles */}
           <div className="dark-card" style={{ padding: 0 }}>
-            <div className="toggle-row" style={{ padding: '14px 20px' }}>
+            <div className="toggle-row" style={{ padding: '10px 20px' }}>
               <label htmlFor="speech">Enable Speech</label>
-              <input id="speech" type="checkbox" className="toggle" checked={speech}
-                onChange={e => setSpeech(e.target.checked)} />
+              <input id="speech" type="checkbox" className="toggle" checked={speech} onChange={e => setSpeech(e.target.checked)} />
             </div>
-            <div className="toggle-row" style={{ padding: '14px 20px', borderBottom: 'none' }}>
+            <div className="toggle-row" style={{ padding: '10px 20px', borderBottom: 'none' }}>
               <label htmlFor="wordMode">Word Mode</label>
-              <input id="wordMode" type="checkbox" className="toggle" checked={wordMode}
-                onChange={e => setWordMode(e.target.checked)} />
+              <input id="wordMode" type="checkbox" className="toggle" checked={wordMode} onChange={e => setWordMode(e.target.checked)} />
             </div>
           </div>
 
-
           {/* Current Letter */}
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Detected Letter</span>
-            <div className="dark-card flex items-center justify-center" style={{ padding: '18px 20px' }}>
-              <span style={{ fontSize: 48, fontWeight: 700, color: currentLetter ? '#fff' : 'rgba(255,255,255,0.1)', lineHeight: 1, direction: 'rtl' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Detected Letter</span>
+            <div className="dark-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
+              <span style={{ fontSize: 40, fontWeight: 700, color: currentLetter ? 'var(--text)' : 'var(--text-ghost)', lineHeight: 1, direction: 'rtl' }}>
                 {currentLetter || '—'}
               </span>
             </div>
-            <button
-              onClick={acceptLetter}
-              disabled={!currentLetter}
-              className="psl-btn"
-              style={{ width: '100%', height: 50, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
+            <button onClick={acceptLetter} disabled={!currentLetter} className="psl-btn"
+              style={{ width: '100%', height: 42, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
               Accept Letter
             </button>
           </div>
 
-          {/* Current Word being built */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Current Word</span>
+          {/* Current Word */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Word</span>
               {currentWord && (
-                <button onClick={deleteLetter}
-                  style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', background: 'none', border: 'none' }}
-                  className="hover:text-white transition-colors">
+                <button onClick={deleteLetter} style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none' }}>
                   ← Delete
                 </button>
               )}
             </div>
-            <div className="dark-card" style={{ padding: '14px 20px', minHeight: 56, direction: 'rtl', textAlign: 'right' }}>
-              <span style={{ fontSize: 28, fontWeight: 700, color: currentWord ? '#fff' : 'rgba(255,255,255,0.1)', letterSpacing: '0.05em' }}>
+            <div className="dark-card" style={{ padding: '10px 16px', minHeight: 48, direction: 'rtl', textAlign: 'right' }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: currentWord ? 'var(--text)' : 'var(--text-ghost)', letterSpacing: '0.05em' }}>
                 {currentWord || '—'}
               </span>
             </div>
-            <button
-              onClick={addWord}
-              disabled={!currentWord}
-              className="psl-btn"
-              style={{ width: '100%', height: 50, opacity: currentWord ? 1 : 0.3, cursor: currentWord ? 'pointer' : 'not-allowed' }}>
+            <button onClick={addWord} disabled={!currentWord} className="psl-btn"
+              style={{ width: '100%', height: 42, opacity: currentWord ? 1 : 0.3, cursor: currentWord ? 'pointer' : 'not-allowed' }}>
               Add Word to Sentence
             </button>
           </div>
 
-          {/* Sentence output */}
-          <div className="flex flex-col gap-2 flex-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Sentence</span>
+          {/* Sentence */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sentence</span>
               <div style={{ display: 'flex', gap: 8 }}>
                 {sentence.length > 0 && (
                   <>
-                    <button onClick={copyToClipboard}
-                      style={{ fontSize: 12, color: copied ? '#fb397d' : 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-                      className="hover:text-white transition-colors">
+                    <button onClick={copyToClipboard} style={{ fontSize: 12, color: copied ? '#fb397d' : 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
-                    <button onClick={() => setSentence([])}
-                      style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}
-                      className="hover:text-white transition-colors">
+                    <button onClick={() => setSentence([])} style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                       Clear
                     </button>
                   </>
@@ -228,19 +218,13 @@ export default function SignPage() {
             </div>
             <div className="dark-card" style={{ padding: 16, minHeight: 80, direction: 'rtl', textAlign: 'right' }}>
               {sentence.length === 0
-                ? <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 14 }}>جملہ یہاں ظاہر ہوگا…</span>
+                ? <span style={{ color: 'var(--text-ghost)', fontSize: 14 }}>جملہ یہاں ظاہر ہوگا…</span>
                 : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end' }}>
                     {sentence.map((word, i) => (
-                      <span key={i}
-                        onClick={() => removeWord(i)}
-                        title="Click to remove"
-                        style={{
-                          fontSize: 20, fontWeight: 600, color: '#fff', cursor: 'pointer',
-                          padding: '2px 6px', borderRadius: 4,
-                          transition: 'background 0.15s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(251,57,125,0.25)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      <span key={i} onClick={() => removeWord(i)} title="Click to remove"
+                        style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)', cursor: 'pointer', padding: '2px 6px', borderRadius: 4, transition: 'background 0.15s' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(251,57,125,0.2)'}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                       >
                         {word}
                       </span>
@@ -248,34 +232,28 @@ export default function SignPage() {
                   </div>
               }
             </div>
-            <button
-              onClick={() => speakSentence(sentence)}
-              disabled={sentence.length === 0}
-              className="psl-btn"
-              style={{ width: '100%', height: 50, opacity: sentence.length > 0 ? 1 : 0.3, cursor: sentence.length > 0 ? 'pointer' : 'not-allowed' }}>
+            <button onClick={() => speakSentence(sentence)} disabled={sentence.length === 0} className="psl-btn"
+              style={{ width: '100%', height: 42, opacity: sentence.length > 0 ? 1 : 0.3, cursor: sentence.length > 0 ? 'pointer' : 'not-allowed' }}>
               Speak Sentence
             </button>
           </div>
 
         </div>
 
-        {/* ── RIGHT: Camera feed ──────────────────────────────────────────── */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black gap-4">
+        {/* RIGHT: Camera feed */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
           <div className="feed-box w-full" style={{ maxWidth: 720, aspectRatio: '4/3' }}>
             <span className="feed-label">Camera Feed</span>
             {detecting && (
-              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center',
-                gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
+              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
                 LIVE
               </span>
             )}
             {detecting ? (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src="http://127.0.0.1:8000/api/stream" alt="Live feed"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <img src="http://127.0.0.1:8000/api/stream" alt="Live feed" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: 12, color: 'rgba(255,255,255,0.15)' }}>
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'var(--text-ghost)' }}>
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                   <rect x="2" y="10" width="44" height="32" rx="4" stroke="currentColor" strokeWidth="2"/>
                   <circle cx="24" cy="26" r="8" stroke="currentColor" strokeWidth="2"/>
@@ -287,16 +265,11 @@ export default function SignPage() {
             )}
           </div>
 
-          {/* Start / Stop */}
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
-              <button onClick={startDetection} className="psl-btn" style={{ width: '100%', height: 50 }}>
-                Start Detection
-              </button>
+              <button onClick={startDetection} className="psl-btn" style={{ width: '100%', height: 50 }}>Start Detection</button>
             ) : (
-              <button onClick={handleStop} className="psl-btn danger" style={{ width: '100%', height: 50 }}>
-                Stop Detection
-              </button>
+              <button onClick={handleStop} className="psl-btn danger" style={{ width: '100%', height: 50 }}>Stop Detection</button>
             )}
           </div>
         </div>

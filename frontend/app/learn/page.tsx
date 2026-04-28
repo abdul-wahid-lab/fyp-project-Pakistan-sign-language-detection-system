@@ -4,16 +4,19 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 const API = "http://127.0.0.1:8000/api";
 const TOTAL = 36;
 
 const LABELS: string[] = [
-  "ء","ا","ب","ت","ث","ح","خ","د","ذ","ر",
+  "ا","ب","ت","ث","ج","ح","خ","د","ذ","ر",
   "ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
-  "ق","ل","م","ن","و","ٹ","پ","چ","ڈ","ژ",
-  "ک","گ","ں","ھ","ی","ے",
+  "ق","ل","م","ن","و","ٹ","پ","چ","ڈ","ڑ",
+  "ژ","ک","گ","ہ","ی","ے",
 ];
+
+const normalize = (s: string) => s.replace(/\u202C/g, "").trim();
 
 export default function LearnPage() {
   const [current, setCurrent] = useState(1);
@@ -52,7 +55,7 @@ export default function LearnPage() {
         const data = await res.json();
         if (data.label && data.label !== "no match" && data.label !== "no confidence") {
           setDetectedLetter(data.label);
-          setResult(data.label === LABELS[current - 1] ? "correct" : "wrong");
+          setResult(normalize(data.label) === normalize(LABELS[current - 1]) ? "correct" : "wrong");
         } else {
           setDetectedLetter("");
           setResult(null);
@@ -75,34 +78,40 @@ export default function LearnPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-10 py-5 border-b border-white/8">
-        <Link href="/" className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm">
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+        >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Back
         </Link>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="dot-accent" />
-          <span className="font-bold text-white tracking-tight">Learn Signs</span>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>Learn Signs</span>
         </div>
-        <div className="badge">Pakistan Sign Language</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="badge">Pakistan Sign Language</div>
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Body */}
-      <div className="flex flex-1 gap-0 overflow-hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* LEFT: Sign display */}
-        <div className="w-[380px] flex-shrink-0 flex flex-col gap-5 p-8 border-r border-white/8">
+        <div style={{ width: 380, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
 
           {/* Expected letter */}
           <div>
-            <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Sign Letter</span>
-            <div className="dark-card mt-2 flex items-center justify-center" style={{ padding: '18px 20px', minHeight: 80 }}>
-              <span style={{ fontSize: 56, fontWeight: 800, color: '#fff', lineHeight: 1, direction: 'rtl' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sign Letter</span>
+            <div className="dark-card" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', minHeight: 64 }}>
+              <span style={{ fontSize: 44, fontWeight: 800, color: 'var(--text)', lineHeight: 1, direction: 'rtl' }}>
                 {LABELS[current - 1]}
               </span>
             </div>
@@ -110,11 +119,11 @@ export default function LearnPage() {
 
           {/* Detected letter */}
           <div>
-            <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Detected Letter</span>
-            <div className="dark-card mt-2 flex items-center justify-center" style={{ padding: '18px 20px', minHeight: 80 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Detected Letter</span>
+            <div className="dark-card" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', minHeight: 64 }}>
               <span style={{
-                fontSize: 48, fontWeight: 700, lineHeight: 1, direction: 'rtl',
-                color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : 'rgba(255,255,255,0.15)',
+                fontSize: 40, fontWeight: 700, lineHeight: 1, direction: 'rtl',
+                color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : 'var(--text-ghost)',
               }}>
                 {detectedLetter || '—'}
               </span>
@@ -122,38 +131,30 @@ export default function LearnPage() {
           </div>
 
           {/* Sign image */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">Image of Sign</span>
-              <span className="text-xs text-white/30">{current} / {TOTAL}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image of Sign</span>
+              <span style={{ fontSize: 12, color: 'var(--text-sub)' }}>{current} / {TOTAL}</span>
             </div>
-            <div className="dark-card flex items-center justify-center" style={{ padding: 16, minHeight: 200 }}>
+            <div className="dark-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, minHeight: 150, flex: 1 }}>
               <Image
                 src={`/images/alphabet/${current}.png`}
                 alt={`Sign ${current}`}
-                width={200}
-                height={200}
-                style={{ objectFit: 'contain' }}
+                width={160}
+                height={160}
+                style={{ objectFit: 'contain', maxHeight: '100%' }}
               />
             </div>
           </div>
 
           {/* Next / Prev */}
           <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              onClick={prev}
-              disabled={current === 1}
-              className="psl-btn"
-              style={{ flex: 1, height: 48, opacity: current === 1 ? 0.3 : 1, cursor: current === 1 ? 'not-allowed' : 'pointer' }}
-            >
+            <button onClick={prev} disabled={current === 1} className="psl-btn"
+              style={{ flex: 1, height: 42, opacity: current === 1 ? 0.3 : 1, cursor: current === 1 ? 'not-allowed' : 'pointer' }}>
               ← Previous
             </button>
-            <button
-              onClick={next}
-              disabled={current === TOTAL}
-              className="psl-btn"
-              style={{ flex: 1, height: 48, opacity: current === TOTAL ? 0.3 : 1, cursor: current === TOTAL ? 'not-allowed' : 'pointer' }}
-            >
+            <button onClick={next} disabled={current === TOTAL} className="psl-btn"
+              style={{ flex: 1, height: 42, opacity: current === TOTAL ? 0.3 : 1, cursor: current === TOTAL ? 'not-allowed' : 'pointer' }}>
               Next →
             </button>
           </div>
@@ -161,27 +162,22 @@ export default function LearnPage() {
         </div>
 
         {/* RIGHT: Camera feed */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black gap-4">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
 
           <div className="feed-box w-full" style={{ maxWidth: 720, aspectRatio: '4/3', position: 'relative' }}>
             <span className="feed-label">Camera Feed</span>
 
             {detecting && (
-              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center',
-                gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
+              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
                 LIVE
               </span>
             )}
 
             {detecting ? (
-              <img
-                src="http://127.0.0.1:8000/api/stream"
-                alt="Live feed"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
+              <img src="http://127.0.0.1:8000/api/stream" alt="Live feed"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: 12, color: 'rgba(255,255,255,0.15)' }}>
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'var(--text-ghost)' }}>
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                   <rect x="2" y="10" width="44" height="32" rx="4" stroke="currentColor" strokeWidth="2"/>
                   <circle cx="24" cy="26" r="8" stroke="currentColor" strokeWidth="2"/>
@@ -192,7 +188,6 @@ export default function LearnPage() {
               </div>
             )}
 
-            {/* Result overlay on camera */}
             {result && (
               <div style={{
                 position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
@@ -201,12 +196,7 @@ export default function LearnPage() {
                 border: `1px solid ${result === 'correct' ? 'rgba(34,197,94,0.4)' : 'rgba(251,57,125,0.4)'}`,
                 borderRadius: 10, padding: '10px 20px', zIndex: 5, whiteSpace: 'nowrap',
               }}>
-                <Image
-                  src={result === 'correct' ? '/images/good.png' : '/images/bad.png'}
-                  alt={result}
-                  width={28}
-                  height={28}
-                />
+                <Image src={result === 'correct' ? '/images/good.png' : '/images/bad.png'} alt={result} width={28} height={28} />
                 <span style={{ fontSize: 16, fontWeight: 700, color: result === 'correct' ? '#4ade80' : '#fb397d' }}>
                   {result === 'correct' ? 'Correct!' : 'Not correct — keep trying'}
                 </span>
@@ -214,16 +204,11 @@ export default function LearnPage() {
             )}
           </div>
 
-          {/* Start / Stop */}
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
-              <button onClick={startCamera} className="psl-btn" style={{ width: '100%', height: 50 }}>
-                Start Camera
-              </button>
+              <button onClick={startCamera} className="psl-btn" style={{ width: '100%', height: 50 }}>Start Camera</button>
             ) : (
-              <button onClick={stopCamera} className="psl-btn danger" style={{ width: '100%', height: 50 }}>
-                Stop Camera
-              </button>
+              <button onClick={stopCamera} className="psl-btn danger" style={{ width: '100%', height: 50 }}>Stop Camera</button>
             )}
           </div>
 
