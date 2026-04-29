@@ -2,6 +2,7 @@
 import Link from "next/link";
 import ChromaKeyVideo from "./components/ChromaKeyVideo";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { Button } from "./components/Button";
 
 export default function Home() {
   return (
@@ -67,9 +68,9 @@ export default function Home() {
 
           <div style={{ display: 'flex', gap: 12 }}>
             <Link href="/sign">
-              <button className="psl-btn" style={{ height: 50, minWidth: 170, fontSize: 14 }}>
+              <Button style={{ height: 50, minWidth: 170, fontSize: 14 }}>
                 Start Detection
-              </button>
+              </Button>
             </Link>
             <Link href="/learn" style={{
               height: 50, minWidth: 140, fontSize: 14, fontWeight: 600,

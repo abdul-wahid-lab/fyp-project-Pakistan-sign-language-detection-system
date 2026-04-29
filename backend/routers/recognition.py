@@ -19,6 +19,6 @@ def match(body: MatchRequest):
     if label not in ("no match", "no confidence") and label != _last_label:
         _last_label = label
         if body.speech == 1:
-            speech_service.play(label)
+            speech_service.play(label, body.voice_mode)
 
     return {"label": label, "mode": body.mode}

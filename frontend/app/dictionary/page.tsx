@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Button } from "../components/Button";
 
 /* ── Data ──────────────────────────────────────────────────── */
 
@@ -128,13 +129,13 @@ const CATEGORIES: Category[] = [
 function BackCrumb({ label, onBack }: { label: string; onBack: () => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <button onClick={onBack}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, transition: 'color 0.2s' }}
+      <Button variant="ghost" onClick={onBack}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, transition: 'color 0.2s' }}
         onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
         onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
         Dictionary
-      </button>
+      </Button>
       <span style={{ color: 'var(--text-faint)', fontSize: 13 }}>/</span>
       <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{label}</span>
     </div>
@@ -181,10 +182,10 @@ export default function DictionaryPage() {
           onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-medium)')}
         />
         {query && (
-          <button onClick={() => setQuery('')}
-            style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, lineHeight: 0 }}>
+          <Button variant="ghost" onClick={() => setQuery('')}
+            style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', padding: 2, lineHeight: 0 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -228,7 +229,7 @@ export default function DictionaryPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
-            {CATEGORIES.map(cat => (
+            {CATEGORIES.filter(cat => cat.ready).map(cat => (
               <div key={cat.id} onClick={() => cat.ready && setView(cat.id)}
                 style={{
                   background: 'var(--bg-card)', border: `1px solid ${cat.ready ? 'var(--border)' : 'var(--border-subtle)'}`,
@@ -318,7 +319,6 @@ export default function DictionaryPage() {
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
                   >
-                    {/* Hand icon placeholder */}
                     <div style={{ width: 60, height: 60, borderRadius: 10, background: 'rgba(251,57,125,0.08)', border: '1px solid rgba(251,57,125,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb397d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
@@ -339,13 +339,13 @@ export default function DictionaryPage() {
       {/* ── COMING SOON (other categories) ────────────────────── */}
       {view !== 'home' && view !== 'alphabet' && view !== 'words' && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 48, position: 'relative' }}>
-          <button onClick={goHome}
-            style={{ position: 'absolute', top: 24, left: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, transition: 'color 0.2s' }}
+          <Button variant="ghost" onClick={goHome}
+            style={{ position: 'absolute', top: 24, left: 0, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Dictionary
-          </button>
+          </Button>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {activeCategory?.icon}
           </div>
@@ -355,9 +355,9 @@ export default function DictionaryPage() {
               Sign images for <strong style={{ color: 'var(--text)' }}>{activeCategory?.title}</strong> will be added in the next update.
             </p>
           </div>
-          <button onClick={goHome} className="psl-btn" style={{ height: 42, minWidth: 160, fontSize: 13 }}>
+          <Button onClick={goHome} style={{ height: 42, minWidth: 160, fontSize: 13 }}>
             Back to Dictionary
-          </button>
+          </Button>
         </div>
       )}
 
@@ -371,9 +371,10 @@ export default function DictionaryPage() {
       {selectedAlpha && (
         <div onClick={() => setSelectedAlpha(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
-            <button onClick={() => setSelectedAlpha(null)} style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, lineHeight: 0 }}>
+            <Button variant="ghost" onClick={() => setSelectedAlpha(null)}
+              style={{ position: 'absolute', top: 14, right: 14, padding: 4, lineHeight: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            </Button>
             <span style={{ fontSize: 72, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1 }}>{selectedAlpha.label}</span>
             <Image src={`/images/alphabet/${selectedAlpha.index}.png`} alt={`Sign for ${selectedAlpha.label}`} width={220} height={220} style={{ objectFit: 'contain' }} />
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sign {selectedAlpha.index} of {ALPHA_SIGNS.length}</span>
@@ -385,9 +386,10 @@ export default function DictionaryPage() {
       {selectedWord && (
         <div onClick={() => setSelectedWord(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '40px 48px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 300 }}>
-            <button onClick={() => setSelectedWord(null)} style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, lineHeight: 0 }}>
+            <Button variant="ghost" onClick={() => setSelectedWord(null)}
+              style={{ position: 'absolute', top: 14, right: 14, padding: 4, lineHeight: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            </Button>
             <div style={{ width: 80, height: 80, borderRadius: 16, background: 'rgba(251,57,125,0.08)', border: '1px solid rgba(251,57,125,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fb397d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>

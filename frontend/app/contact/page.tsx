@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Button } from "../components/Button";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -103,9 +104,9 @@ export default function ContactPage() {
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', marginBottom: 10 }}>Message Sent!</h2>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 28 }}>Thanks for reaching out. We&apos;ll get back to you soon.</p>
-              <button className="psl-btn" onClick={() => { setSent(false); setForm({ name: '', email: '', message: '' }); }}>
+              <Button onClick={() => { setSent(false); setForm({ name: '', email: '', message: '' }); }}>
                 Send Another
-              </button>
+              </Button>
             </div>
           ) : (
             <form className="dark-card" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -132,9 +133,9 @@ export default function ContactPage() {
                   )}
                 </div>
               ))}
-              <button type="submit" className="psl-btn" style={{ width: '100%', height: 50 }}>
+              <Button type="submit" style={{ width: '100%', height: 50 }}>
                 Send Message
-              </button>
+              </Button>
             </form>
           )}
         </div>

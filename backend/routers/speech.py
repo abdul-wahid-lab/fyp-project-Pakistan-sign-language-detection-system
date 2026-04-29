@@ -3,7 +3,7 @@
 
 import os
 from datetime import datetime
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from models.schemas import StatusResponse
 from services import speech_service
@@ -18,9 +18,15 @@ class MissingWordRequest(BaseModel):
 
 
 @router.post("/speech/{label}", response_model=StatusResponse)
-def play_speech(label: str):
-    speech_service.play(label)
+def play_speech(label: str, mode: str = Query("offline")):
+    speech_service.play(label, mode)
     return {"status": f"playing {label}"}
+
+
+@router.post("/speech/preload/{label}", response_model=StatusResponse)
+def preload_speech(label: str):
+    speech_service.preload(label)
+    return {"status": f"preloading {label}"}
 
 
 @router.post("/log-missing")
