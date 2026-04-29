@@ -7,8 +7,9 @@ class CaptureRequest(BaseModel):
     duration: Optional[int] = None  # seconds; None = continuous
 
 class MatchRequest(BaseModel):
-    mode: int = 1      # 0 = alphabet, 1 = word
-    speech: int = 0    # 0 = off, 1 = on
+    mode: int = 1          # 0 = alphabet, 1 = word
+    speech: int = 0        # 0 = off, 1 = on
+    voice_mode: str = "offline"  # "edge" or "offline"
 
 class PredictionResponse(BaseModel):
     label: str

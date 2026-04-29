@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Button } from "../components/Button";
 
 const API = "http://127.0.0.1:8000/api";
 
@@ -34,7 +35,7 @@ export default function SignPage() {
         const res = await fetch(`${API}/match`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: wordMode ? 1 : 0, speech: speech ? 1 : 0 }),
+          body: JSON.stringify({ mode: wordMode ? 1 : 0, speech: speech ? 1 : 0, voice_mode: "edge" }),
         });
         const data = await res.json();
         if (data.label !== "no match" && data.label !== "no confidence") {
@@ -42,6 +43,7 @@ export default function SignPage() {
           if (letter !== lastLetterRef.current) {
             lastLetterRef.current = letter;
             setCurrentLetter(letter);
+            preload(letter);
           }
         }
       } catch { /* backend unreachable */ }
@@ -57,31 +59,27 @@ export default function SignPage() {
     lastLetterRef.current = "";
   }
 
+  function preload(text: string) {
+    if (!text) return;
+    fetch(`${API}/speech/preload/${encodeURIComponent(text)}`, { method: "POST" }).catch(() => {});
+  }
+
   async function speakWord(word: string) {
     if (!word) return;
-    const url = `http://127.0.0.1:8000/audio/${encodeURIComponent(word)}.mp3`;
-    await new Promise<void>(resolve => {
-      const audio = new Audio(url);
-      audio.onended = () => resolve();
-      audio.onerror = () => {
-        fetch(`${API}/log-missing`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ word }),
-        }).catch(() => {});
-        resolve();
-      };
-      audio.play().catch(() => resolve());
-    });
+    await fetch(`${API}/speech/${encodeURIComponent(word)}`, { method: "POST" }).catch(() => {});
   }
 
   async function speakSentence(words: string[]) {
-    for (const word of words) await speakWord(word);
+    await speakWord(words.join(" "));
   }
 
   function addWord() {
     if (!currentWord) return;
-    setSentence(prev => [...prev, currentWord]);
+    setSentence(prev => {
+      const next = [...prev, currentWord];
+      preload(next.join(" "));
+      return next;
+    });
     setCurrentWord("");
     setCurrentLetter("");
     lastLetterRef.current = "";
@@ -172,10 +170,9 @@ export default function SignPage() {
                 {currentLetter || '—'}
               </span>
             </div>
-            <button onClick={acceptLetter} disabled={!currentLetter} className="psl-btn"
-              style={{ width: '100%', height: 42, opacity: currentLetter ? 1 : 0.3, cursor: currentLetter ? 'pointer' : 'not-allowed' }}>
+            <Button onClick={acceptLetter} disabled={!currentLetter} style={{ width: '100%', height: 42 }}>
               Accept Letter
-            </button>
+            </Button>
           </div>
 
           {/* Current Word */}
@@ -183,9 +180,9 @@ export default function SignPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Word</span>
               {currentWord && (
-                <button onClick={deleteLetter} style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none' }}>
+                <Button variant="ghost" onClick={deleteLetter} style={{ fontSize: 12 }}>
                   ← Delete
-                </button>
+                </Button>
               )}
             </div>
             <div className="dark-card" style={{ padding: '10px 16px', minHeight: 48, direction: 'rtl', textAlign: 'right' }}>
@@ -193,10 +190,9 @@ export default function SignPage() {
                 {currentWord || '—'}
               </span>
             </div>
-            <button onClick={addWord} disabled={!currentWord} className="psl-btn"
-              style={{ width: '100%', height: 42, opacity: currentWord ? 1 : 0.3, cursor: currentWord ? 'pointer' : 'not-allowed' }}>
+            <Button onClick={addWord} disabled={!currentWord} style={{ width: '100%', height: 42 }}>
               Add Word to Sentence
-            </button>
+            </Button>
           </div>
 
           {/* Sentence */}
@@ -206,12 +202,13 @@ export default function SignPage() {
               <div style={{ display: 'flex', gap: 8 }}>
                 {sentence.length > 0 && (
                   <>
-                    <button onClick={copyToClipboard} style={{ fontSize: 12, color: copied ? '#fb397d' : 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <Button variant="ghost" onClick={copyToClipboard}
+                      style={{ fontSize: 12, color: copied ? '#fb397d' : 'var(--text-muted)' }}>
                       {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                    <button onClick={() => setSentence([])} style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    </Button>
+                    <Button variant="ghost" onClick={() => setSentence([])} style={{ fontSize: 12 }}>
                       Clear
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>
@@ -232,10 +229,9 @@ export default function SignPage() {
                   </div>
               }
             </div>
-            <button onClick={() => speakSentence(sentence)} disabled={sentence.length === 0} className="psl-btn"
-              style={{ width: '100%', height: 42, opacity: sentence.length > 0 ? 1 : 0.3, cursor: sentence.length > 0 ? 'pointer' : 'not-allowed' }}>
+            <Button onClick={() => speakSentence(sentence)} disabled={sentence.length === 0} style={{ width: '100%', height: 42 }}>
               Speak Sentence
-            </button>
+            </Button>
           </div>
 
         </div>
@@ -267,9 +263,9 @@ export default function SignPage() {
 
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
-              <button onClick={startDetection} className="psl-btn" style={{ width: '100%', height: 50 }}>Start Detection</button>
+              <Button onClick={startDetection} style={{ width: '100%', height: 50 }}>Start Detection</Button>
             ) : (
-              <button onClick={handleStop} className="psl-btn danger" style={{ width: '100%', height: 50 }}>Stop Detection</button>
+              <Button variant="danger" onClick={handleStop} style={{ width: '100%', height: 50 }}>Stop Detection</Button>
             )}
           </div>
         </div>

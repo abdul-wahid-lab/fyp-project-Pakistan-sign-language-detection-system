@@ -2,22 +2,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { Button } from "../components/Button";
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
   return (
     <div style={{ display: 'flex', gap: 4 }}>
       {[1, 2, 3, 4, 5].map(star => (
-        <button key={star} type="button" onClick={() => onChange(star)}
-          onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, lineHeight: 0 }}>
+        <Button key={star} variant="ghost" type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          style={{ padding: 2, lineHeight: 0 }}>
           <svg width="22" height="22" viewBox="0 0 24 24"
             fill={(hover || value) >= star ? '#fb397d' : 'none'}
             stroke={(hover || value) >= star ? '#fb397d' : 'var(--border-strong)'}
             strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -120,9 +123,9 @@ export default function FeedbackPage() {
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
                 Your feedback has been recorded. We appreciate you helping us improve.
               </p>
-              <button className="psl-btn" onClick={() => { setSubmitted(false); setRatings({}); setLikes(''); setImprove(''); setName(''); }}>
+              <Button onClick={() => { setSubmitted(false); setRatings({}); setLikes(''); setImprove(''); setName(''); }}>
                 Submit Another
-              </button>
+              </Button>
             </div>
           ) : (
             <form className="dark-card" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -156,9 +159,9 @@ export default function FeedbackPage() {
                   onFocus={focusBorder} onBlur={blurBorder} />
               </div>
 
-              <button type="submit" className="psl-btn" style={{ width: '100%', height: 44 }}>
+              <Button type="submit" style={{ width: '100%', height: 44 }}>
                 Submit Feedback
-              </button>
+              </Button>
             </form>
           )}
         </div>

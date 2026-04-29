@@ -32,7 +32,11 @@ DB_PATH = "data\\db\\main_dataset.db"
 
 def extract_keypoints(image_path):
     """Run MediaPipe on one image, return flat [x1,y1,...,x21,y21] or None."""
-    frame = cv2.imread(image_path)
+    # cv2.imread fails on Windows with non-ASCII paths (e.g. Arabic folder names)
+    import numpy as np
+    with open(image_path, 'rb') as f:
+        data = np.frombuffer(f.read(), dtype=np.uint8)
+    frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
     if frame is None:
         return None
 
