@@ -29,7 +29,8 @@ import PSL.helper.normalize as norm
 
 DB_PATH = "data/db/main_dataset.db"
 
-mp_holistic = mp.solutions.holistic
+mp_hands  = mp.solutions.hands
+mp_pose   = mp.solutions.pose
 
 POSE_MAP = [
     (0, None), (11, 12), (12, None), (14, None), (16, None),
@@ -66,17 +67,31 @@ def get_hand_kp(hand_landmarks, w, h):
     return result
 
 
-def extract_features(image_path, holistic):
+def extract_features(image_path, hands_detector, pose_detector):
     img = cv2.imread(image_path)
     if img is None:
         return None
     h, w = img.shape[:2]
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    results = holistic.process(rgb)
 
-    pose_kp  = get_pose_kp(results.pose_landmarks, w, h)
-    rhand_kp = get_hand_kp(results.right_hand_landmarks, w, h)
-    lhand_kp = get_hand_kp(results.left_hand_landmarks, w, h)
+    # Detect hands using dedicated Hands model (much better on static images)
+    hands_results = hands_detector.process(rgb)
+    pose_results  = pose_detector.process(rgb)
+
+    rhand_kp = [0.0] * 63
+    lhand_kp = [0.0] * 63
+
+    if hands_results.multi_hand_landmarks and hands_results.multi_handedness:
+        for hand_lm, handedness in zip(hands_results.multi_hand_landmarks,
+                                        hands_results.multi_handedness):
+            label = handedness.classification[0].label  # "Left" or "Right"
+            kp = get_hand_kp(hand_lm, w, h)
+            if label == "Right":
+                rhand_kp = kp
+            else:
+                lhand_kp = kp
+
+    pose_kp = get_pose_kp(pose_results.pose_landmarks, w, h)
 
     # Confidence check
     r_conf = sum(rhand_kp[i] for i in range(2, len(rhand_kp), 3))
@@ -140,12 +155,10 @@ def build_insert_sql():
 
 
 def cols_to_row(handR, handL, pose, label):
-    # handR = [x1,y1, x2,y2, ..., x21,y21] = 42 values
-    Rx = handR[0::2]  # x values
-    Ry = handR[1::2]  # y values
+    Rx = handR[0::2]
+    Ry = handR[1::2]
     Lx = handL[0::2]
     Ly = handL[1::2]
-    # pose = 26 values (13 keypoints as x,y)
     Px = pose[0::2]
     Py = pose[1::2]
     return Rx + Ry + Lx + Ly + Px + Py + [label]
@@ -171,16 +184,21 @@ def main():
         conn.commit()
         print("Cleared existing poseDataset rows.")
 
-    sql  = build_insert_sql()
+    sql = build_insert_sql()
 
     IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
     total_inserted = 0
     total_skipped  = 0
 
-    with mp_holistic.Holistic(
+    with mp_hands.Hands(
         static_image_mode=True,
-        min_detection_confidence=0.5
-    ) as holistic:
+        max_num_hands=2,
+        min_detection_confidence=0.3
+    ) as hands_detector, mp_pose.Pose(
+        static_image_mode=True,
+        min_detection_confidence=0.3
+    ) as pose_detector:
+
         for label in sorted(os.listdir(dataset_root)):
             label_dir = os.path.join(dataset_root, label)
             if not os.path.isdir(label_dir):
@@ -191,7 +209,7 @@ def main():
                 if os.path.splitext(fname)[1].lower() not in IMAGE_EXTS:
                     continue
                 img_path = os.path.join(label_dir, fname)
-                feats = extract_features(img_path, holistic)
+                feats = extract_features(img_path, hands_detector, pose_detector)
                 if feats is None:
                     skipped += 1
                     continue
