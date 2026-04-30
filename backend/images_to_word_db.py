@@ -21,6 +21,7 @@ import sys
 import math
 import sqlite3
 import cv2
+import numpy as np
 import mediapipe as mp
 
 import PSL.helper.helperFunc as helper
@@ -68,7 +69,9 @@ def get_hand_kp(hand_landmarks, w, h):
 
 
 def extract_features(image_path, hands_detector, pose_detector):
-    img = cv2.imread(image_path)
+    # cv2.imread silently returns None for non-ASCII (e.g. Arabic) paths on Windows
+    raw = np.fromfile(image_path, dtype=np.uint8)
+    img = cv2.imdecode(raw, cv2.IMREAD_COLOR)
     if img is None:
         return None
     h, w = img.shape[:2]
