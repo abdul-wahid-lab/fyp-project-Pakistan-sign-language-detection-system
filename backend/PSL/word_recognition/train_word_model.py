@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Train word recognition model from poseDataset in main_dataset.db.
+Train word recognition model from wordDataset in main_dataset.db.
+Uses the same pipeline as the alphabet model (right hand, 42 features).
 Run from backend/ directory:
     python -m PSL.word_recognition.train_word_model
 """
@@ -26,12 +27,8 @@ def load_dataset():
     conn = sqlite3.connect(DB_PATH)
     cur  = conn.cursor()
 
-    r_cols = [f"Rx{i}" for i in range(1, 22)] + [f"Ry{i}" for i in range(1, 22)]
-    l_cols = [f"Lx{i}" for i in range(1, 22)] + [f"Ly{i}" for i in range(1, 22)]
-    p_cols = [f"Px{i}" for i in range(1, 14)] + [f"Py{i}" for i in range(1, 14)]
-    all_cols = r_cols + l_cols + p_cols
-
-    sql = f"SELECT {','.join(all_cols)}, label FROM poseDataset"
+    cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)]
+    sql = f"SELECT {','.join(cols)}, label FROM wordDataset"
     cur.execute(sql)
     rows = cur.fetchall()
     conn.close()
@@ -58,7 +55,7 @@ def main():
     print("Loading dataset from DB...")
     X, y_raw = load_dataset()
     if len(X) == 0:
-        print("No samples found in poseDataset.")
+        print("No samples found in wordDataset.")
         sys.exit(1)
 
     print(f"Total samples: {len(X)}  Features: {X.shape[1]}")

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Process a word image dataset and insert normalized keypoints into poseDataset.
+Process a word image dataset and insert normalized keypoints into wordDataset.
+Uses the exact same pipeline as the alphabet model (right hand, scale + center).
 
 Dataset structure expected:
     <dataset_root>/
@@ -26,50 +27,22 @@ import mediapipe as mp
 
 import PSL.helper.helperFunc as helper
 import PSL.helper.scale as scale
-import PSL.helper.normalize as norm
+import PSL.helper.move as move
 
 DB_PATH = "data/db/main_dataset.db"
 
-mp_hands  = mp.solutions.hands
-mp_pose   = mp.solutions.pose
-
-POSE_MAP = [
-    (0, None), (11, 12), (12, None), (14, None), (16, None),
-    (11, None), (13, None), (15, None), (23, 24), (24, None),
-    (26, None), (28, None), (23, None), (25, None), (27, None),
-    (5, None),  (2, None), (8, None),  (7, None),
-]
-
-
-def get_pose_kp(pose_landmarks, w, h):
-    if pose_landmarks is None:
-        return [0.0] * 57
-    lm = pose_landmarks.landmark
-    result = []
-    for idx_a, idx_b in POSE_MAP:
-        if idx_b is None:
-            p = lm[idx_a]
-            x, y, c = p.x * w, p.y * h, p.visibility
-        else:
-            pa, pb = lm[idx_a], lm[idx_b]
-            x = ((pa.x + pb.x) / 2) * w
-            y = ((pa.y + pb.y) / 2) * h
-            c = (pa.visibility + pb.visibility) / 2
-        result.extend([x, y, c])
-    return result
+mp_hands = mp.solutions.hands
 
 
 def get_hand_kp(hand_landmarks, w, h):
-    if hand_landmarks is None:
-        return [0.0] * 63
     result = []
     for lm in hand_landmarks.landmark:
         result.extend([lm.x * w, lm.y * h, 1.0])
     return result
 
 
-def extract_features(image_path, hands_detector, pose_detector):
-    # cv2.imread silently returns None for non-ASCII (e.g. Arabic) paths on Windows
+def extract_features(image_path, hands_detector):
+    # cv2.imread fails on Windows with non-ASCII (e.g. Arabic) paths
     raw = np.fromfile(image_path, dtype=np.uint8)
     img = cv2.imdecode(raw, cv2.IMREAD_COLOR)
     if img is None:
@@ -77,140 +50,94 @@ def extract_features(image_path, hands_detector, pose_detector):
     h, w = img.shape[:2]
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    # Detect hands using dedicated Hands model (much better on static images)
     hands_results = hands_detector.process(rgb)
-    pose_results  = pose_detector.process(rgb)
 
     rhand_kp = [0.0] * 63
     lhand_kp = [0.0] * 63
 
     if hands_results.multi_hand_landmarks and hands_results.multi_handedness:
         for hand_lm, handedness in zip(hands_results.multi_hand_landmarks,
-                                        hands_results.multi_handedness):
-            label = handedness.classification[0].label  # "Left" or "Right"
+                                       hands_results.multi_handedness):
+            label = handedness.classification[0].label
             kp = get_hand_kp(hand_lm, w, h)
             if label == "Right":
                 rhand_kp = kp
             else:
                 lhand_kp = kp
 
-    pose_kp = get_pose_kp(pose_results.pose_landmarks, w, h)
-
-    # Confidence check
     r_conf = sum(rhand_kp[i] for i in range(2, len(rhand_kp), 3))
     l_conf = sum(lhand_kp[i] for i in range(2, len(lhand_kp), 3))
 
-    # MediaPipe labels from the camera's POV: in frontal images the person's
-    # right hand appears on the left side and gets labeled "Left". Swap when
-    # the "right" slot is empty but the "left" slot has a strong detection.
-    if r_conf <= 12 and l_conf > 12:
-        rhand_kp, lhand_kp = lhand_kp, rhand_kp
-        r_conf, l_conf = l_conf, r_conf
+    # In frontal images the person's right hand is on the camera's left side,
+    # so MediaPipe labels it "Left". Swap when right slot is empty but left is strong.
+    if r_conf <= 10 and l_conf > 10:
+        rhand_kp = lhand_kp
+        r_conf = l_conf
 
-    if r_conf <= 12:
-        return None
-    if not (l_conf > 12 or l_conf < 2):
+    if r_conf <= 10:
         return None
 
-    # Normalize pose
-    pose_points = helper.removePoints(pose_kp)
-    p1 = [pose_points[0], pose_points[1]]
-    p2 = [pose_points[2], pose_points[3]]
-    distance = math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+    # Same normalization as alphabet_recognition.py
+    hand_points = helper.removePoints(rhand_kp)   # strips confidence → 42 floats
+
+    p1 = [hand_points[0], hand_points[1]]
+    p2 = [hand_points[18], hand_points[19]]
+    distance = math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
     if distance == 0:
         return None
-    scaled_results, _ = norm.scaleBody(pose_points, distance)
-    poseResults, _    = norm.moveBody(scaled_results)
 
-    # Normalize right hand
-    hand_right_points = helper.removePoints(rhand_kp)
-    p1 = [hand_right_points[0], hand_right_points[1]]
-    p2 = [hand_right_points[18], hand_right_points[19]]
-    distance = math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
-    if distance == 0:
-        return None
-    RightResult, _ = scale.scalePoints(hand_right_points, distance)
-    handRightResults, _ = norm.move_to_wrist(RightResult, poseResults[8], poseResults[9])
+    scale.scalePoints(hand_points, distance)       # matches alphabet pipeline exactly
+    results, _ = move.centerPoints(hand_points)    # wrist anchored to (150, 150)
 
-    # Normalize left hand
-    if l_conf > 3:
-        hand_left_points = helper.removePoints(lhand_kp)
-        p1 = [hand_left_points[0], hand_left_points[1]]
-        p2 = [hand_left_points[18], hand_left_points[19]]
-        distance = math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
-        if distance != 0:
-            LeftResult, _ = scale.scalePoints(hand_left_points, distance)
-            handLeftResults, _ = norm.move_to_wrist(LeftResult, poseResults[14], poseResults[15])
-        else:
-            handLeftResults, _ = norm.move_to_wrist(hand_left_points, poseResults[14], poseResults[15])
-    else:
-        handLeftResults = [0.0] * 42
-
-    posePoints = []
-    for x in range(18):
-        posePoints.append(poseResults[x])
-    for x in range(30, 38):
-        posePoints.append(poseResults[x])
-
-    return handRightResults, handLeftResults, posePoints
+    return results                                 # 42 floats
 
 
 def build_insert_sql():
-    r_cols = [f"Rx{i}" for i in range(1, 22)] + [f"Ry{i}" for i in range(1, 22)]
-    l_cols = [f"Lx{i}" for i in range(1, 22)] + [f"Ly{i}" for i in range(1, 22)]
-    p_cols = [f"Px{i}" for i in range(1, 14)] + [f"Py{i}" for i in range(1, 14)]
-    all_cols = r_cols + l_cols + p_cols + ["label"]
-    placeholders = ",".join(["?"] * len(all_cols))
-    return f"INSERT INTO poseDataset ({','.join(all_cols)}) VALUES ({placeholders})"
+    cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)] + ["label"]
+    placeholders = ",".join(["?"] * len(cols))
+    return f"INSERT INTO wordDataset ({','.join(cols)}) VALUES ({placeholders})"
 
 
-def cols_to_row(handR, handL, pose, label):
-    Rx = handR[0::2]
-    Ry = handR[1::2]
-    Lx = handL[0::2]
-    Ly = handL[1::2]
-    Px = pose[0::2]
-    Py = pose[1::2]
-    return Rx + Ry + Lx + Ly + Px + Py + [label]
+def cols_to_row(features, label):
+    # features = [x1,y1,x2,y2,...,x21,y21] interleaved → split into x list and y list
+    x_vals = features[0::2]
+    y_vals = features[1::2]
+    return x_vals + y_vals + [label]
 
 
 def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset_root", help="Path to image dataset root folder")
-    parser.add_argument("--clear", action="store_true", help="Delete existing poseDataset rows before inserting")
+    parser.add_argument("--clear", action="store_true",
+                        help="Delete existing wordDataset rows before inserting")
     args = parser.parse_args()
 
     if not os.path.isdir(args.dataset_root):
         print(f"ERROR: '{args.dataset_root}' is not a valid directory.")
         sys.exit(1)
 
-    dataset_root = args.dataset_root
     conn = sqlite3.connect(DB_PATH)
-    cur  = conn.cursor()
+    cur = conn.cursor()
 
     if args.clear:
-        cur.execute("DELETE FROM poseDataset")
+        cur.execute("DELETE FROM wordDataset")
         conn.commit()
-        print("Cleared existing poseDataset rows.")
+        print("Cleared existing wordDataset rows.")
 
     sql = build_insert_sql()
-
     IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
     total_inserted = 0
-    total_skipped  = 0
+    total_skipped = 0
 
     with mp_hands.Hands(
         static_image_mode=True,
         max_num_hands=2,
         min_detection_confidence=0.3
-    ) as hands_detector, mp_pose.Pose(
-        static_image_mode=True,
-        min_detection_confidence=0.3
-    ) as pose_detector:
+    ) as hands_detector:
 
-        for label in sorted(os.listdir(dataset_root)):
-            label_dir = os.path.join(dataset_root, label)
+        for label in sorted(os.listdir(args.dataset_root)):
+            label_dir = os.path.join(args.dataset_root, label)
             if not os.path.isdir(label_dir):
                 continue
 
@@ -219,23 +146,22 @@ def main():
                 if os.path.splitext(fname)[1].lower() not in IMAGE_EXTS:
                     continue
                 img_path = os.path.join(label_dir, fname)
-                feats = extract_features(img_path, hands_detector, pose_detector)
+                feats = extract_features(img_path, hands_detector)
                 if feats is None:
                     skipped += 1
                     continue
-                handR, handL, pose = feats
-                row = cols_to_row(handR, handL, pose, label)
+                row = cols_to_row(feats, label)
                 cur.execute(sql, row)
                 inserted += 1
 
             conn.commit()
-            print(f"  {label}: {inserted} inserted, {skipped} skipped (low confidence)")
+            print(f"  {label}: {inserted} inserted, {skipped} skipped")
             total_inserted += inserted
-            total_skipped  += skipped
+            total_skipped += skipped
 
     conn.close()
     print(f"\nDone. Total inserted: {total_inserted}, skipped: {total_skipped}")
-    print(f"Now run: python -m PSL.word_recognition.train_word_model")
+    print("Now run: python -m PSL.word_recognition.train_word_model")
 
 
 if __name__ == "__main__":
