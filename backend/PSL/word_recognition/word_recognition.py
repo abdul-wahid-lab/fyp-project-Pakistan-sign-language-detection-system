@@ -39,8 +39,8 @@ def match_ann(fileName):
         if distance == 0:
             return "no confidence"
 
-        scale.scalePoints(handPoints, distance)
-        handRightResults, _ = move.centerPoints(handPoints)
+        result, _ = scale.scalePoints(handPoints, distance)
+        handRightResults, _ = move.centerPoints(result)
 
         y_pred = model.predict(scaler.transform(np.array([handRightResults])), verbose=0)
         C = np.argmax(y_pred)
