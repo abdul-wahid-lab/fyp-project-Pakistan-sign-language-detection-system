@@ -3,7 +3,6 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from routers import capture, recognition, speech, stream
 from core.config import settings
 
@@ -24,8 +23,6 @@ app.include_router(capture.router,     prefix="/api", tags=["capture"])
 app.include_router(recognition.router, prefix="/api", tags=["recognition"])
 app.include_router(speech.router,      prefix="/api", tags=["speech"])
 app.include_router(stream.router,      prefix="/api", tags=["stream"])
-
-app.mount("/audio", StaticFiles(directory=settings.SPEECH_DIR), name="audio")
 
 
 @app.get("/")
