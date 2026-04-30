@@ -23,13 +23,14 @@ SCALER_OUT = "data/models/word_scaler.pkl"
 LE_OUT     = "data/models/word_label_encoder.pkl"
 
 
-def load_dataset():
+def load_dataset(word_labels):
     conn = sqlite3.connect(DB_PATH)
     cur  = conn.cursor()
 
     cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)]
-    sql = f"SELECT {','.join(cols)}, label FROM wordDataset"
-    cur.execute(sql)
+    placeholders = ",".join(["?"] * len(word_labels))
+    sql = f"SELECT {','.join(cols)}, label FROM rightHandDataset WHERE label IN ({placeholders})"
+    cur.execute(sql, word_labels)
     rows = cur.fetchall()
     conn.close()
 
@@ -52,10 +53,25 @@ def build_model(input_dim, num_classes):
 
 
 def main():
+    import argparse
+    import os
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dataset_root", help="Path to the word image dataset root (same folder used for insertion)")
+    args = parser.parse_args()
+
+    word_labels = [
+        d for d in os.listdir(args.dataset_root)
+        if os.path.isdir(os.path.join(args.dataset_root, d))
+    ]
+    if not word_labels:
+        print("No label folders found in dataset root.")
+        sys.exit(1)
+    print(f"Word labels: {word_labels}")
+
     print("Loading dataset from DB...")
-    X, y_raw = load_dataset()
+    X, y_raw = load_dataset(word_labels)
     if len(X) == 0:
-        print("No samples found in wordDataset.")
+        print("No samples found in rightHandDataset for these labels.")
         sys.exit(1)
 
     print(f"Total samples: {len(X)}  Features: {X.shape[1]}")

@@ -95,7 +95,7 @@ def extract_features(image_path, hands_detector):
 def build_insert_sql():
     cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)] + ["label"]
     placeholders = ",".join(["?"] * len(cols))
-    return f"INSERT INTO wordDataset ({','.join(cols)}) VALUES ({placeholders})"
+    return f"INSERT INTO rightHandDataset ({','.join(cols)}) VALUES ({placeholders})"
 
 
 def cols_to_row(features, label):
@@ -121,9 +121,15 @@ def main():
     cur = conn.cursor()
 
     if args.clear:
-        cur.execute("DELETE FROM wordDataset")
+        # Only delete the word labels we are about to insert, not the alphabet data
+        word_labels = [
+            d for d in os.listdir(args.dataset_root)
+            if os.path.isdir(os.path.join(args.dataset_root, d))
+        ]
+        for lbl in word_labels:
+            cur.execute("DELETE FROM rightHandDataset WHERE label=?", (lbl,))
         conn.commit()
-        print("Cleared existing wordDataset rows.")
+        print(f"Cleared {word_labels} from rightHandDataset.")
 
     sql = build_insert_sql()
     IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
