@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jul  7 13:54:32 2019
+Created on Thu Jul  4 18:55:38 2019
 
 """
 
@@ -16,10 +16,11 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.utils import to_categorical
 
+
 from sklearn.metrics import confusion_matrix, classification_report
 from matplotlib import pyplot as plt
 
-def train_words():    
+def train_alphabets():    
     """
     extracting data from db
     """
@@ -27,14 +28,10 @@ def train_words():
     crsr = connection.cursor()
     
     # extracting x and y points
-    sql = 'SELECT Rx1,Ry1'
+    sql = 'SELECT x1,y1'
     for x in range(2,22):
-        sql = sql + ',Rx'+str(x)+',Ry'+str(x)
-    for x in range(1,22):
-        sql = sql + ',Lx'+str(x)+',Ly'+str(x)
-    for x in range(1,14):
-        sql = sql + ',Px'+str(x)+',Py'+str(x)
-    sql = sql + ' FROM poseDataset WHERE 1'
+        sql = sql + ',x'+str(x)+',y'+str(x)
+    sql = sql + ' FROM rightHandDataset WHERE 1'
     crsr.execute(sql)
     feature_res = crsr.fetchall()
     feature_res = np.asarray(feature_res)
@@ -43,7 +40,7 @@ def train_words():
         features.append(x)
     
     # extracting labels
-    crsr.execute('SELECT label FROM poseDataset WHERE 1')
+    crsr.execute('SELECT label FROM rightHandDataset WHERE 1')
     label_res = crsr.fetchall()
     labels=[]
     for x in label_res:
@@ -53,49 +50,48 @@ def train_words():
     le = preprocessing.LabelEncoder()
     # Converting string labels into numbers.
     label_encoded=le.fit_transform(labels)
-    
-    num_classes = len(set(labels))
+
+    num_classes = len(set(le.classes_))
     label_encoded = to_categorical(label_encoded, num_classes=num_classes)
 
     X_train, X_test, y_train, y_test = train_test_split(features, label_encoded, test_size=0.2)
-    
+
     scaler = StandardScaler().fit(X_train)
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
-    pickle.dump(scaler, open("data\\models\\word_scaler.pkl", "wb"))
-    pickle.dump(le, open("data\\models\\word_label_encoder.pkl", "wb"))
+    pickle.dump(scaler, open("data\\models\\alphabet_scaler.pkl", "wb"))
+    pickle.dump(le, open("data\\models\\alphabet_label_encoder.pkl", "wb"))
     
     # Initialize the constructor
     model = Sequential()
     
     # Add an input layer 
-    model.add(Dense(110, activation='relu', input_shape=(110,)))
+    model.add(Dense(120, activation='relu', input_shape=(42,)))
     
     # Add one hidden layer 
     model.add(Dense(64, activation='relu'))
     
-    # Add one hidden layer 
-    model.add(Dense(64, activation='relu'))
     
-    
-    # Add an output layer 
+    # Add an output layer
     model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
                        
-#    model.fit(X_train, y_train,epochs=30, batch_size=1, verbose=1)
+#    model.fit(X_train, y_train,epochs=20, batch_size=1, verbose=1)
+    
+#    model.save("..\\data\\models\\alphabet_model.h5")
     
     
     
-    
-    
-
+    score = model.evaluate(X_test, y_test,verbose=1)
+    #
+    print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
 
     history = model.fit(X_train, y_train,validation_split=0.20,epochs=25, batch_size=1, verbose=1)
 
-    model.save("data\\models\\word_model.h5")
+    model.save("data\\models\\alphabet_model.h5")
     
     y_pred = model.predict(X_test)
     score = model.evaluate(X_test, y_test,verbose=1)
@@ -167,124 +163,15 @@ def train_words():
     
     class_names = l
     
-    plt.figure(figsize = (10,10))
+    plt.figure(figsize = (25,25))
     plot_confusion_matrix(cm, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
     
     plt.show()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#import json
-#import sqlite3
-#import move
-#import helperFunc as helper
-#import numpy as np
-#
-#from sklearn import preprocessing
-#from sklearn.model_selection import train_test_split
-#from sklearn import metrics
-#
-#from sklearn import svm
-#
-#
-#connection = sqlite3.connect("db\\main_dataset.db") 
-#crsr = connection.cursor()
-#
-#sql = 'SELECT Rx1,Ry1'
-#for x in range(2,22):
-#    sql = sql + ',Rx'+str(x)+',Ry'+str(x)
-#for x in range(1,22):
-#    sql = sql + ',Lx'+str(x)+',Ly'+str(x)
-#for x in range(1,14):
-#    sql = sql + ',Px'+str(x)+',Py'+str(x)
-#sql = sql + ' FROM poseDataset WHERE 1'
-#
-#crsr.execute(sql)
-#feature_res = crsr.fetchall()
-#
-#feature_res = np.asarray(feature_res)
-#
-#features=[]
-#for x in feature_res:
-#    features.append(x)
-#
-#crsr.execute('SELECT label FROM poseDataset WHERE 1')
-#label_res = crsr.fetchall()
-#
-#
-#labels=[]
-#for x in label_res:
-#    labels.append(x)
-##creating labelEncoder
-#le = preprocessing.LabelEncoder()
-## Converting string labels into numbers.
-#label_encoded=le.fit_transform(np.ravel(labels,order='C'))
-##print(label_encoded)
-#
-#X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2)
-#
-##Create a svm Classifier
-#clf = svm.SVC(kernel='linear') # Linear Kernel
-##Train the model using the training sets
-#clf.fit(X_train, np.ravel(y_train,order='C'))
-#
-##Predict the response for test dataset
-#y_pred = clf.predict([features[38]])
-#print( y_pred[0])
-#
-###Predict the response for test dataset
-##
-##y_pred = clf.predict(X_test)
-##
-##print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    train_alphabets()
 
 
 
