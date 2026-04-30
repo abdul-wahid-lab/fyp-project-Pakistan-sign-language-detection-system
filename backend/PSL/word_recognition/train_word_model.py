@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Train word recognition model from wordDataset in main_dataset.db.
-Uses the same pipeline as the alphabet model (right hand, 42 features).
+Train word recognition model from rightHandDataset in main_dataset.db.
+Same pipeline as alphabet model (right hand, 42 features).
+
+Run AFTER images_to_db.py --dataset <words_folder> --clear
 Run from backend/ directory:
     python -m PSL.word_recognition.train_word_model
 """
@@ -23,17 +25,13 @@ SCALER_OUT = "data/models/word_scaler.pkl"
 LE_OUT     = "data/models/word_label_encoder.pkl"
 
 
-def load_dataset(word_labels):
+def load_dataset():
     conn = sqlite3.connect(DB_PATH)
     cur  = conn.cursor()
-
     cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)]
-    placeholders = ",".join(["?"] * len(word_labels))
-    sql = f"SELECT {','.join(cols)}, label FROM rightHandDataset WHERE label IN ({placeholders})"
-    cur.execute(sql, word_labels)
+    cur.execute(f"SELECT {','.join(cols)}, label FROM rightHandDataset")
     rows = cur.fetchall()
     conn.close()
-
     X = np.array([list(r[:-1]) for r in rows], dtype=np.float32)
     y = np.array([r[-1] for r in rows])
     return X, y
@@ -53,25 +51,10 @@ def build_model(input_dim, num_classes):
 
 
 def main():
-    import argparse
-    import os
-    parser = argparse.ArgumentParser()
-    parser.add_argument("dataset_root", help="Path to the word image dataset root (same folder used for insertion)")
-    args = parser.parse_args()
-
-    word_labels = [
-        d for d in os.listdir(args.dataset_root)
-        if os.path.isdir(os.path.join(args.dataset_root, d))
-    ]
-    if not word_labels:
-        print("No label folders found in dataset root.")
-        sys.exit(1)
-    print(f"Word labels: {word_labels}")
-
-    print("Loading dataset from DB...")
-    X, y_raw = load_dataset(word_labels)
+    print("Loading dataset from rightHandDataset...")
+    X, y_raw = load_dataset()
     if len(X) == 0:
-        print("No samples found in rightHandDataset for these labels.")
+        print("No samples found. Run images_to_db.py --dataset <words_folder> --clear first.")
         sys.exit(1)
 
     print(f"Total samples: {len(X)}  Features: {X.shape[1]}")
