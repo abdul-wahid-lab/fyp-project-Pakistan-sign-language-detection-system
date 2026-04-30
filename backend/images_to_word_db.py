@@ -97,6 +97,13 @@ def extract_features(image_path, hands_detector, pose_detector):
     r_conf = sum(rhand_kp[i] for i in range(2, len(rhand_kp), 3))
     l_conf = sum(lhand_kp[i] for i in range(2, len(lhand_kp), 3))
 
+    # MediaPipe labels from the camera's POV: in frontal images the person's
+    # right hand appears on the left side and gets labeled "Left". Swap when
+    # the "right" slot is empty but the "left" slot has a strong detection.
+    if r_conf <= 12 and l_conf > 12:
+        rhand_kp, lhand_kp = lhand_kp, rhand_kp
+        r_conf, l_conf = l_conf, r_conf
+
     if r_conf <= 12:
         return None
     if not (l_conf > 12 or l_conf < 2):
