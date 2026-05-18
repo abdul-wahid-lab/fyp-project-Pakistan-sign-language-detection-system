@@ -16,8 +16,12 @@ Run from the backend/ directory:
 import os
 
 import sys
+import io
 import math
 import sqlite3
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 import argparse
 import cv2
 import mediapipe as mp
@@ -74,7 +78,7 @@ def normalize_keypoints(keypoints):
 
 def ensure_table(conn):
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS rightHandDataset (
+        CREATE TABLE IF NOT EXISTS alphabetDataset (
             id INTEGER PRIMARY KEY,
             x1 DOUBLE, y1 DOUBLE, x2 DOUBLE, y2 DOUBLE,
             x3 DOUBLE, y3 DOUBLE, x4 DOUBLE, y4 DOUBLE,
@@ -99,7 +103,7 @@ def process_dataset(dataset_path, db_path, clear_existing):
     ensure_table(conn)
 
     if clear_existing:
-        conn.execute("DELETE FROM rightHandDataset")
+        conn.execute("DELETE FROM alphabetDataset")
         conn.commit()
         print("Cleared existing records.")
 
@@ -131,7 +135,7 @@ def process_dataset(dataset_path, db_path, clear_existing):
 
             placeholders = ",".join(["?"] * 42)
             conn.execute(
-                f"INSERT INTO rightHandDataset VALUES (NULL, {placeholders}, ?)",
+                f"INSERT INTO alphabetDataset VALUES (NULL, {placeholders}, ?)",
                 norm[:42] + [label]
             )
             label_count += 1
