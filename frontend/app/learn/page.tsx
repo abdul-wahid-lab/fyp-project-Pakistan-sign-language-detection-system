@@ -8,13 +8,13 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { Button, TabButton } from "../components/Button";
 
 const API = "http://127.0.0.1:8000/api";
-const TOTAL = 36;
+const TOTAL = 37;
 
 const LABELS: string[] = [
-  "ا","ب","ت","ث","ج","ح","خ","د","ذ","ر",
-  "ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
-  "ق","ل","م","ن","و","ٹ","پ","چ","ڈ","ڑ",
-  "ژ","ک","گ","ہ","ی","ے",
+  "ء","ا","ب","ت","ث","ج","ح","خ","د","ذ",
+  "ر","ز","س","ش","ص","ض","ط","ظ","ع","غ",
+  "ف","ق","ل","م","ن","و","ٹ","پ","چ","ڈ",
+  "ژ","ک","گ","ں","ھ","ی","ے",
 ];
 
 const normalize = (s: string) => s.replace(/‬/g, "").trim();

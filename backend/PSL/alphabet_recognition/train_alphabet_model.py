@@ -13,12 +13,33 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 
 
 from sklearn.metrics import confusion_matrix, classification_report
 from matplotlib import pyplot as plt
+from tensorflow.keras.callbacks import Callback
+
+
+class EpochBar(Callback):
+    def on_train_begin(self, logs=None):
+        self.epochs = self.params['epochs']
+        print(f"\nTraining for {self.epochs} epochs:\n")
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        filled = int((epoch + 1) / self.epochs * 20)
+        bar = '█' * filled + '░' * (20 - filled)
+        pct = (epoch + 1) / self.epochs * 100
+        loss = logs.get('loss', 0)
+        acc  = logs.get('accuracy', 0)
+        val_loss = logs.get('val_loss', 0)
+        val_acc  = logs.get('val_accuracy', 0)
+        print(f"Epoch {epoch+1:3d}/{self.epochs} [{bar}] {pct:5.1f}%"
+              f"  loss: {loss:.4f}  acc: {acc:.4f}"
+              f"  val_loss: {val_loss:.4f}  val_acc: {val_acc:.4f}")
+
 
 def train_alphabets():    
     """
@@ -67,29 +88,18 @@ def train_alphabets():
     
     # Add an input layer 
     model.add(Dense(120, activation='relu', input_shape=(42,)))
-    
-    # Add one hidden layer 
+    model.add(Dropout(0.3))
     model.add(Dense(64, activation='relu'))
-    
-    
-    # Add an output layer
+    model.add(Dropout(0.3))
     model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
                        
-#    model.fit(X_train, y_train,epochs=20, batch_size=1, verbose=1)
-    
-#    model.save("..\\data\\models\\alphabet_model.h5")
-    
-    
-    
-    score = model.evaluate(X_test, y_test,verbose=1)
-    #
-    print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
-
-    history = model.fit(X_train, y_train,validation_split=0.20,epochs=25, batch_size=1, verbose=1)
+    history = model.fit(X_train, y_train, validation_split=0.20,
+                        epochs=25, batch_size=1, verbose=0,
+                        callbacks=[EpochBar()])
 
     model.save("data\\models\\alphabet_model.h5")
     
@@ -123,51 +133,43 @@ def train_alphabets():
     cm = confusion_matrix(y_test.argmax(axis=1), y_pred.argmax(axis=1))
     
     import itertools
-    plt.rcParams.update({'font.size': 16})
-    def plot_confusion_matrix(cm, classes,
-                              normalize=False,
-                              title='Confusion matrix',
-                              cmap=plt.cm.Blues):
-        """
-        This function prints and plots the confusion matrix.
-        Normalization can be applied by setting `normalize=True`.
-        """
+    plt.rcParams.update({'font.size': 10})
+
+    def plot_confusion_matrix(cm, classes, normalize=False,
+                              title='Confusion matrix', cmap=plt.cm.Blues):
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-            print("Normalized confusion matrix")
-        else:
-            print('Confusion matrix, without normalization')
-    
-        print(cm)
-    
+
         plt.imshow(cm, interpolation='nearest', cmap=cmap)
-        plt.title(title)
+        plt.title(title, fontsize=14)
         plt.colorbar()
         tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes, rotation=0)
-        plt.yticks(tick_marks, classes)
-    
+        plt.xticks(tick_marks, classes, rotation=90, fontsize=9)
+        plt.yticks(tick_marks, classes, fontsize=9)
+
         fmt = '.2f' if normalize else 'd'
         thresh = cm.max() / 2.
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            plt.text(j, i, format(cm[i, j], fmt),
-                     horizontalalignment="center",
+            val = format(cm[i, j], fmt)
+            if normalize and cm[i, j] < 0.01:
+                continue  # skip near-zero cells to reduce clutter
+            plt.text(j, i, val, horizontalalignment="center", fontsize=7,
                      color="white" if cm[i, j] > thresh else "black")
-    
+
         plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
-    
-    l = np.array(labels) 
+        plt.ylabel('True label', fontsize=12)
+        plt.xlabel('Predicted label', fontsize=12)
+
+    l = np.array(labels)
     l = np.unique(l)
-    
     class_names = l
-    
-    plt.figure(figsize = (25,25))
+
+    plt.figure(figsize=(40, 40))
     plot_confusion_matrix(cm, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
-    
+    plt.savefig("data\\models\\confusion_matrix.png", dpi=150, bbox_inches='tight')
     plt.show()
+    print("Confusion matrix saved to data\\models\\confusion_matrix.png")
 
 
 if __name__ == "__main__":

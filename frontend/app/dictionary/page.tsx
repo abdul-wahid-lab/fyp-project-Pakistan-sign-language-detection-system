@@ -9,28 +9,19 @@ import { Button } from "../components/Button";
 /* ── Data ──────────────────────────────────────────────────── */
 
 const LABELS: string[] = [
-  "ا","ب","ت","ث","ج","ح","خ","د","ذ","ر",
-  "ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
-  "ق","ل","م","ن","و","ٹ","پ","چ","ڈ","ڑ",
-  "ژ","ک","گ","ہ","ی","ے",
+  "ء","ا","ب","ت","ث","ج","ح","خ","د","ذ",
+  "ر","ز","س","ش","ص","ض","ط","ظ","ع","غ",
+  "ف","ق","ل","م","ن","و","ٹ","پ","چ","ڈ",
+  "ژ","ک","گ","ں","ھ","ی","ے",
 ];
 const ALPHA_SIGNS = LABELS.map((label, i) => ({ label, index: i + 1 }));
 
-const WORDS: { urdu: string; english: string; label: string }[] = [
-  { urdu: 'آپ',     english: 'You (formal)',   label: 'آپ' },
-  { urdu: 'آپ کا', english: 'Your (formal)',   label: 'آپ کا' },
-  { urdu: 'اچھا',  english: 'Good / Okay',     label: 'اچھا' },
-  { urdu: 'جانتا', english: 'Know / Knows',    label: 'جانتا' },
-  { urdu: 'شکریہ', english: 'Thank You',       label: 'شکریہ' },
-  { urdu: 'فون',   english: 'Phone',           label: 'فون' },
-  { urdu: 'میرا',  english: 'My / Mine',       label: 'میرا' },
-  { urdu: 'میں',   english: 'I / Me',          label: 'میں' },
-  { urdu: 'نام',   english: 'Name',            label: 'نام' },
-  { urdu: 'کم',    english: 'Less / Little',   label: 'کم' },
-  { urdu: 'کيا',   english: 'What / Did',      label: 'کيا' },
-  { urdu: 'کھانا', english: 'Food / Meal',     label: 'کھانا' },
-  { urdu: 'Good',  english: 'Good',            label: 'good' },
-  { urdu: 'Name',  english: 'Name',            label: 'name' },
+const WORDS: { urdu: string; english: string; label: string; index: number }[] = [
+  { urdu: 'السلام علیکم', english: 'Hello / Peace',  label: 'السلام علیکم', index: 1 },
+  { urdu: 'اللہ حافظ',   english: 'Goodbye',         label: 'اللہ حافظ',   index: 2 },
+  { urdu: 'باپ',          english: 'Father',           label: 'باپ',          index: 3 },
+  { urdu: 'ماں',          english: 'Mother',           label: 'ماں',          index: 4 },
+  { urdu: 'میں',          english: 'I / Me',           label: 'میں',          index: 5 },
 ];
 
 /* ── Types ─────────────────────────────────────────────────── */
@@ -51,11 +42,11 @@ interface Category {
 
 const CATEGORIES: Category[] = [
   {
-    id: 'alphabet', title: 'Urdu Alphabet', subtitle: '36 letters', count: 36, ready: true,
+    id: 'alphabet', title: 'Urdu Alphabet', subtitle: '37 letters', count: 37, ready: true,
     icon: <span style={{ fontSize: 48, fontWeight: 800, color: '#fb397d', direction: 'rtl', lineHeight: 1 }}>ا</span>,
   },
   {
-    id: 'words', title: 'Words', subtitle: '14 signs', count: 14, ready: true,
+    id: 'words', title: 'Words', subtitle: '5 signs', count: 5, ready: true,
     icon: (
       <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#fb397d" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M8 8h32a2 2 0 0 1 2 2v20a2 2 0 0 1-2 2H16l-8 8V10a2 2 0 0 1 2-2z"/>
@@ -315,19 +306,13 @@ export default function DictionaryPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 14 }}>
                 {filteredWords.map((word) => (
                   <div key={word.label} onClick={() => setSelectedWord(word)}
-                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '20px 16px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, transition: 'border-color 0.15s, transform 0.15s' }}
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 10px 10px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transition: 'border-color 0.15s, transform 0.15s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
                   >
-                    <div style={{ width: 60, height: 60, borderRadius: 10, background: 'rgba(251,57,125,0.08)', border: '1px solid rgba(251,57,125,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fb397d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
-                      </svg>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2, marginBottom: 4 }}>{word.urdu}</div>
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{word.english}</div>
-                    </div>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2 }}>{word.urdu}</span>
+                    <Image src={`/images/words/${word.index}.png`} alt={`Sign for ${word.urdu}`} width={90} height={90} style={{ objectFit: 'contain' }} />
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{word.english}</span>
                   </div>
                 ))}
               </div>
@@ -385,23 +370,14 @@ export default function DictionaryPage() {
       {/* ── WORD MODAL ────────────────────────────────────────── */}
       {selectedWord && (
         <div onClick={() => setSelectedWord(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '40px 48px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 300 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
             <Button variant="ghost" onClick={() => setSelectedWord(null)}
               style={{ position: 'absolute', top: 14, right: 14, padding: 4, lineHeight: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </Button>
-            <div style={{ width: 80, height: 80, borderRadius: 16, background: 'rgba(251,57,125,0.08)', border: '1px solid rgba(251,57,125,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fb397d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
-              </svg>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 52, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2, marginBottom: 8 }}>{selectedWord.urdu}</div>
-              <div style={{ fontSize: 16, color: 'var(--text-muted)', marginBottom: 4 }}>{selectedWord.english}</div>
-            </div>
-            <div style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 16px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', maxWidth: 260, lineHeight: 1.6 }}>
-              Use <strong style={{ color: 'var(--text)' }}>Word Mode</strong> in Sign Detection to detect this word in real-time.
-            </div>
+            <span style={{ fontSize: 52, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2 }}>{selectedWord.urdu}</span>
+            <Image src={`/images/words/${selectedWord.index}.png`} alt={`Sign for ${selectedWord.urdu}`} width={220} height={220} style={{ objectFit: 'contain' }} />
+            <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{selectedWord.english}</span>
           </div>
         </div>
       )}

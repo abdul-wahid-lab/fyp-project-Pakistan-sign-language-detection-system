@@ -116,11 +116,14 @@ def process_dataset(dataset_path, db_path, clear_existing):
         label = label_entry.name
         label_count = 0
 
-        for img_entry in os.scandir(label_entry.path):
-            if not img_entry.is_file():
-                continue
-            if os.path.splitext(img_entry.name)[1].lower() not in image_exts:
-                continue
+        img_files = [
+            e for e in os.scandir(label_entry.path)
+            if e.is_file() and os.path.splitext(e.name)[1].lower() in image_exts
+        ]
+        label_total = len(img_files)
+
+        for idx, img_entry in enumerate(img_files, 1):
+            print(f"  {label}: {idx}/{label_total} (inserted {label_count})", end="\r", flush=True)
 
             total += 1
             kp = extract_keypoints(img_entry.path)
@@ -141,7 +144,7 @@ def process_dataset(dataset_path, db_path, clear_existing):
             label_count += 1
             inserted += 1
 
-        print(f"  {label}: {label_count} images inserted")
+        print(f"  {label}: {label_count}/{label_total} inserted          ")
 
     conn.commit()
     conn.close()
