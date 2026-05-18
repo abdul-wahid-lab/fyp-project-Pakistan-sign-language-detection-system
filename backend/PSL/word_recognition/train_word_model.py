@@ -25,11 +25,11 @@ def train_words():
     crsr = connection.cursor()
 
     cols = ",".join([f"x{i},y{i}" for i in range(1, 22)])
-    crsr.execute(f"SELECT {cols}, label FROM rightHandDataset")
+    crsr.execute(f"SELECT {cols}, label FROM wordDataset")
     rows = crsr.fetchall()
 
     if not rows:
-        print("No data found in rightHandDataset. Run images_to_db.py first.")
+        print("No data found in wordDataset. Run images_to_word_db.py first.")
         sys.exit(1)
 
     features = [list(r[:-1]) for r in rows]

@@ -31,7 +31,7 @@ def train_alphabets():
     sql = 'SELECT x1,y1'
     for x in range(2,22):
         sql = sql + ',x'+str(x)+',y'+str(x)
-    sql = sql + ' FROM rightHandDataset WHERE 1'
+    sql = sql + ' FROM alphabetDataset WHERE 1'
     crsr.execute(sql)
     feature_res = crsr.fetchall()
     feature_res = np.asarray(feature_res)
@@ -40,7 +40,7 @@ def train_alphabets():
         features.append(x)
     
     # extracting labels
-    crsr.execute('SELECT label FROM rightHandDataset WHERE 1')
+    crsr.execute('SELECT label FROM alphabetDataset WHERE 1')
     label_res = crsr.fetchall()
     labels=[]
     for x in label_res:

@@ -92,10 +92,31 @@ def extract_features(image_path, hands_detector):
     return results                                 # 42 floats
 
 
+def ensure_word_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS wordDataset (
+            id INTEGER PRIMARY KEY,
+            x1 DOUBLE, y1 DOUBLE, x2 DOUBLE, y2 DOUBLE,
+            x3 DOUBLE, y3 DOUBLE, x4 DOUBLE, y4 DOUBLE,
+            x5 DOUBLE, y5 DOUBLE, x6 DOUBLE, y6 DOUBLE,
+            x7 DOUBLE, y7 DOUBLE, x8 DOUBLE, y8 DOUBLE,
+            x9 DOUBLE, y9 DOUBLE, x10 DOUBLE, y10 DOUBLE,
+            x11 DOUBLE, y11 DOUBLE, x12 DOUBLE, y12 DOUBLE,
+            x13 DOUBLE, y13 DOUBLE, x14 DOUBLE, y14 DOUBLE,
+            x15 DOUBLE, y15 DOUBLE, x16 DOUBLE, y16 DOUBLE,
+            x17 DOUBLE, y17 DOUBLE, x18 DOUBLE, y18 DOUBLE,
+            x19 DOUBLE, y19 DOUBLE, x20 DOUBLE, y20 DOUBLE,
+            x21 DOUBLE, y21 DOUBLE,
+            label VARCHAR(30)
+        )
+    """)
+    conn.commit()
+
+
 def build_insert_sql():
     cols = [f"x{i}" for i in range(1, 22)] + [f"y{i}" for i in range(1, 22)] + ["label"]
     placeholders = ",".join(["?"] * len(cols))
-    return f"INSERT INTO rightHandDataset ({','.join(cols)}) VALUES ({placeholders})"
+    return f"INSERT INTO wordDataset ({','.join(cols)}) VALUES ({placeholders})"
 
 
 def cols_to_row(features, label):
@@ -119,17 +140,17 @@ def main():
 
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
+    ensure_word_table(conn)
 
     if args.clear:
-        # Only delete the word labels we are about to insert, not the alphabet data
         word_labels = [
             d for d in os.listdir(args.dataset_root)
             if os.path.isdir(os.path.join(args.dataset_root, d))
         ]
         for lbl in word_labels:
-            cur.execute("DELETE FROM rightHandDataset WHERE label=?", (lbl,))
+            cur.execute("DELETE FROM wordDataset WHERE label=?", (lbl,))
         conn.commit()
-        print(f"Cleared {word_labels} from rightHandDataset.")
+        print(f"Cleared {word_labels} from wordDataset.")
 
     sql = build_insert_sql()
     IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
