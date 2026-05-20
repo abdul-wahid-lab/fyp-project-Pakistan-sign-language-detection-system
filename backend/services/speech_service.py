@@ -1,4 +1,3 @@
-# D:\4-2026\backend\services\speech_service.py
 
 import os
 import hashlib

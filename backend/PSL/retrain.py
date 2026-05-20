@@ -1,7 +1,4 @@
-"""
-Created on Fri Jul  5 09:45:03 2019
 
-"""
 
 import PSL.helper.db_helper as dbh
 import PSL.helper.synthesize_data as synth

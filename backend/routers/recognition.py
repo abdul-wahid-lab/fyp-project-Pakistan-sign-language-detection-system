@@ -1,5 +1,3 @@
-# D:\4-2026\backend\routers\recognition.py
-# FROM: fyp\main.py (match() function)
 
 from fastapi import APIRouter
 from models.schemas import MatchRequest, PredictionResponse

@@ -1,5 +1,3 @@
-# D:\4-2026\backend\requirements.txt
-# MERGE: fyp\requirements.txt + fastapi, uvicorn, pydantic-settings
 
 # FastAPI
 fastapi>=0.110.0

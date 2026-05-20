@@ -1,5 +1,3 @@
-# D:\4-2026\backend\models\schemas.py
-
 from pydantic import BaseModel
 from typing import Optional
 
