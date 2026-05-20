@@ -1,5 +1,3 @@
-# D:\4-2026\backend\routers\capture.py
-# FROM: fyp\PSL\capture_alphabets.py + fyp\PSL\capture_words.py
 
 from fastapi import APIRouter
 from models.schemas import StatusResponse

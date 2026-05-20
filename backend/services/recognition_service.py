@@ -1,9 +1,3 @@
-# D:\4-2026\backend\services\recognition_service.py
-# FROM: fyp\PSL\alphabet_recognition\alphabet_recognition.py
-#       fyp\PSL\word_recognition\word_recognition.py
-#       fyp\add_alphabet_from_images.py
-#       fyp\build_psl_dataset.py
-#       fyp\learn_psl.py
 
 import os
 import json

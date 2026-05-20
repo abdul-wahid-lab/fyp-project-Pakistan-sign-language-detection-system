@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Jul  6 12:09:53 2019
 
-"""
 
 # local imports
 import helper.helperFunc as helper

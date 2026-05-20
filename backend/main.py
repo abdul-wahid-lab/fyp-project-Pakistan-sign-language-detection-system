@@ -1,5 +1,3 @@
-# D:\4-2026\backend\main.py
-# FROM: fyp\main.py → rewritten as FastAPI app
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

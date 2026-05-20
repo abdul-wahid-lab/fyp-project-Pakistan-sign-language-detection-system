@@ -1,5 +1,3 @@
-# D:\4-2026\backend\routers\speech.py
-# FROM: fyp\main.py (pygame mixer block)
 
 import os
 from datetime import datetime

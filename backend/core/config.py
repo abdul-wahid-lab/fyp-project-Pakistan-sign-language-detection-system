@@ -1,5 +1,3 @@
-# D:\4-2026\backend\core\config.py
-
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):

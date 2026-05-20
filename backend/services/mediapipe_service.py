@@ -1,5 +1,3 @@
-# D:\4-2026\backend\services\mediapipe_service.py
-# FROM: fyp\PSL\helper\mediapipe_helper.py + fyp\PSL\capture_alphabets.py
 
 import os
 import shutil
