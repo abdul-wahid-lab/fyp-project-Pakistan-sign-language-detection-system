@@ -45,11 +45,7 @@ export default function FeedbackPage() {
   const [improve, setImprove] = useState('');
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
-
-  function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault();
-    setSubmitted(true);
-  }
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.currentTarget.style.borderColor = 'var(--border-strong)';
@@ -59,15 +55,15 @@ export default function FeedbackPage() {
   }
 
   return (
-    <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <main className="psl-feedback-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <span className="dot-accent" />
           <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
+        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
           <Link href="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>About Us</Link>
@@ -81,13 +77,22 @@ export default function FeedbackPage() {
           <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
           <ThemeToggle />
         </div>
+        <button
+          className="psl-hamburger"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </nav>
 
       {/* Content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 56, padding: '32px 80px', overflow: 'hidden' }}>
+      <div className="psl-feedback-content" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 56, padding: '32px 80px', overflow: 'hidden' }}>
 
         {/* Left: intro + ratings */}
-        <div style={{ flex: '0 0 280px' }}>
+        <div className="psl-feedback-left" style={{ flex: '0 0 280px' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: '#fb397d', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             Share Your Thoughts
           </span>
@@ -111,7 +116,7 @@ export default function FeedbackPage() {
         </div>
 
         {/* Right: text form */}
-        <div style={{ flex: 1, maxWidth: 480 }}>
+        <div className="psl-feedback-right" style={{ flex: 1, maxWidth: 480 }}>
           {submitted ? (
             <div className="dark-card" style={{ textAlign: 'center', padding: '56px 40px' }}>
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
@@ -128,7 +133,7 @@ export default function FeedbackPage() {
               </Button>
             </div>
           ) : (
-            <form className="dark-card" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form className="dark-card" onSubmit={e => { e.preventDefault(); setSubmitted(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
@@ -169,10 +174,50 @@ export default function FeedbackPage() {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '14px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)', flexShrink: 0 }}>
+      <div className="psl-footer" style={{ padding: '14px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)', flexShrink: 0 }}>
         <span>PSL · Pakistan Sign Language System</span>
         <span>MediaPipe · Next.js · FastAPI</span>
       </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
 
     </main>
   );

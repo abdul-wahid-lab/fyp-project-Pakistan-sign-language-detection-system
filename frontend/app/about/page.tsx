@@ -1,18 +1,21 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
 
 export default function AboutPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)' }}>
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <span className="dot-accent" />
           <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
+        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
           <Link href="/about" style={{ color: 'var(--text)', textDecoration: 'none', fontWeight: 600 }}>About Us</Link>
           <Link href="/contact" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
@@ -29,10 +32,19 @@ export default function AboutPage() {
           <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
           <ThemeToggle />
         </div>
+        <button
+          className="psl-hamburger"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </nav>
 
       {/* Hero */}
-      <div style={{ padding: '72px 96px 48px', maxWidth: 900 }}>
+      <div className="psl-about-hero" style={{ padding: '72px 96px 48px', maxWidth: 900 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: '#fb397d', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           About the Project
         </span>
@@ -47,7 +59,7 @@ export default function AboutPage() {
       </div>
 
       {/* Cards */}
-      <div style={{ padding: '0 96px 72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900 }}>
+      <div className="psl-about-cards" style={{ padding: '0 96px 72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900 }}>
         {[
           {
             icon: <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>,
@@ -79,7 +91,7 @@ export default function AboutPage() {
       </div>
 
       {/* Tech Stack */}
-      <div style={{ padding: '0 96px 72px' }}>
+      <div className="psl-about-tech" style={{ padding: '0 96px 72px' }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-sub)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           Technology Stack
         </span>
@@ -95,7 +107,7 @@ export default function AboutPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ padding: '0 96px 72px', display: 'flex', gap: 64 }}>
+      <div className="psl-about-stats" style={{ padding: '0 96px 72px', display: 'flex', gap: 64 }}>
         {[['98.6%', 'Test Accuracy'], ['36', 'Urdu Letters'], ['42', 'Landmark Features'], ['16,745', 'Training Samples']].map(([val, label]) => (
           <div key={label}>
             <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>{val}</div>
@@ -103,6 +115,46 @@ export default function AboutPage() {
           </div>
         ))}
       </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{

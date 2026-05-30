@@ -218,3 +218,204 @@ body {
 [data-theme="light"] .text-white\/30,
 [data-theme="light"] .text-white\/40 { color: var(--text-muted) !important; }
 [data-theme="light"] .border-white\/8 { border-color: var(--border) !important; }
+
+/* ── Hamburger button (desktop: hidden) ────────────────────────────────── */
+.psl-hamburger { display: none; }
+
+/* ── Mobile overlay controls (desktop: hidden) ─────────────────────────── */
+.psl-mob-controls { display: none; }
+
+/* ── Mobile responsive (< 640px) ───────────────────────────────────────── */
+@media (max-width: 639px) {
+  /* Nav */
+  .psl-nav        { padding: 14px 16px !important; }
+  .psl-nav-links  { display: none !important; }
+  .psl-nav-badge  { display: none !important; }
+  .psl-footer     { padding: 12px 16px !important; }
+
+  /* Sign / Learn pages — allow scrolling, stack vertically */
+  .psl-main-fixed { height: auto !important; overflow-y: auto !important; }
+  .psl-body       { flex-direction: column !important; overflow: visible !important; }
+  .psl-sidebar    {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    overflow: visible !important;
+  }
+  .psl-feed { padding: 16px !important; justify-content: flex-start !important; }
+
+  /* Result overlay (learn page) */
+  .psl-result-overlay {
+    white-space: normal !important;
+    font-size: 13px !important;
+    padding: 8px 14px !important;
+  }
+
+  /* Home page hero */
+  .psl-hero       { flex-direction: column !important; }
+  .psl-hero-text  { flex: none !important; padding: 28px 20px 16px !important; gap: 20px !important; }
+  .psl-hero-video { display: none !important; }
+  .psl-stats      { gap: 16px !important; flex-wrap: wrap !important; }
+  .psl-hero-btns  { flex-direction: column !important; }
+  .psl-hero-btn-link { width: 100% !important; min-width: 0 !important; }
+
+  /* Feedback page */
+  .psl-feedback-main    { height: auto !important; overflow-y: auto !important; }
+  .psl-feedback-content {
+    flex-direction: column !important;
+    padding: 28px 20px 32px !important;
+    gap: 28px !important;
+    overflow: visible !important;
+    align-items: flex-start !important;
+  }
+  .psl-feedback-left  { flex: none !important; width: 100% !important; }
+  .psl-feedback-right { flex: none !important; width: 100% !important; max-width: 100% !important; }
+
+  /* Contact page */
+  .psl-contact-content {
+    flex-direction: column !important;
+    padding: 28px 20px 40px !important;
+    gap: 32px !important;
+  }
+  .psl-contact-info { flex: none !important; width: 100% !important; }
+  .psl-contact-form { flex: none !important; width: 100% !important; max-width: 100% !important; }
+
+  /* About page */
+  .psl-about-hero  { padding: 32px 20px 20px !important; }
+  .psl-about-cards { padding: 0 20px 32px !important; grid-template-columns: 1fr !important; }
+  .psl-about-tech  { padding: 0 20px 32px !important; }
+  .psl-about-stats { padding: 0 20px 32px !important; flex-wrap: wrap !important; gap: 20px !important; }
+
+  /* Dictionary page */
+  .psl-dict-pad     { padding: 16px !important; }
+  .psl-dict-subpad  { padding: 16px 16px 0 !important; }
+  .psl-dict-gridpad { padding: 8px 16px 24px !important; }
+  .psl-dict-header  {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .psl-search-wrap  { width: 100% !important; }
+  .psl-search-input { width: 100% !important; }
+
+  /* Modals */
+  .psl-modal-inner {
+    padding: 24px 20px !important;
+    min-width: 0 !important;
+    width: min(90vw, 320px) !important;
+  }
+  .psl-modal-letter { font-size: 48px !important; }
+  .psl-modal-word   { font-size: 36px !important; }
+
+  /* ── Sign / Learn pages — nav floats over camera, true full-screen ── */
+  .psl-sign-main,
+  .psl-learn-main {
+    background: var(--bg) !important;
+    position: relative !important;
+  }
+  .psl-sign-main .psl-nav,
+  .psl-learn-main .psl-nav {
+    position: absolute !important;
+    top: 0 !important; left: 0 !important; right: 0 !important;
+    z-index: 20 !important;
+    background: transparent !important;
+    border-bottom-color: transparent !important;
+  }
+  .psl-sign-main .psl-nav a,
+  .psl-sign-main .psl-nav span,
+  .psl-sign-main .psl-nav button,
+  .psl-learn-main .psl-nav a,
+  .psl-learn-main .psl-nav span,
+  .psl-learn-main .psl-nav button {
+    color: var(--text) !important;
+    border-color: transparent !important;
+  }
+  /* Body fills full height since nav is out of flow */
+  .psl-sign-body,
+  .psl-learn-body {
+    height: 100vh !important;
+  }
+  /* Camera area — white when inactive, camera covers it when active */
+  .psl-sign-feed,
+  .psl-learn-feed,
+  .psl-sign-cambox,
+  .psl-learn-cambox {
+    background: var(--bg) !important;
+  }
+  /* Hide feed-box label on mobile fullscreen */
+  .psl-sign-cambox .feed-label,
+  .psl-learn-cambox .feed-label {
+    display: none !important;
+  }
+
+  /* Push top overlay bar down below the floating nav (~56px), remove dark bg */
+  .psl-sign-feed .psl-mob-controls > div:first-child,
+  .psl-learn-feed .psl-mob-controls > div:first-child {
+    margin-top: 56px !important;
+    background: transparent !important;
+  }
+
+  /* ── Sign page — Snapchat style: camera full screen, controls overlaid ── */
+  .psl-sign-main    { height: 100vh !important; overflow: hidden !important; }
+  .psl-sign-body    { overflow: hidden !important; }
+  .psl-sign-sidebar { display: none !important; }
+  .psl-sign-feed    {
+    flex: 1 !important;
+    height: 100% !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    position: relative !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+  .psl-sign-cambox  {
+    position: absolute !important;
+    inset: 0 !important;
+    aspect-ratio: unset !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  .psl-sign-feed > div:last-child { display: none !important; }
+  .psl-mob-controls { display: flex !important; }
+
+  /* ── Learn page — Snapchat style ── */
+  .psl-learn-main    { height: 100vh !important; overflow: hidden !important; }
+  .psl-learn-body    { overflow: hidden !important; }
+  .psl-learn-sidebar { display: none !important; }
+  .psl-learn-feed    {
+    flex: 1 !important;
+    height: 100% !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    position: relative !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+  .psl-learn-cambox  {
+    position: absolute !important;
+    inset: 0 !important;
+    aspect-ratio: unset !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  .psl-learn-feed > div:last-child { display: none !important; }
+
+  /* Hamburger (mobile: show) */
+  .psl-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    padding: 4px;
+    flex-shrink: 0;
+  }
+}
