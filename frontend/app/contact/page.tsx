@@ -7,11 +7,7 @@ import { Button } from "../components/Button";
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
-
-  function handleSubmit(e: { preventDefault(): void }) {
-    e.preventDefault();
-    setSent(true);
-  }
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const inputStyle: React.CSSProperties = {
     width: '100%', background: 'var(--bg-card)', border: '1px solid var(--border-medium)',
@@ -23,12 +19,15 @@ export default function ContactPage() {
     <main style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)' }}>
+      <nav className="psl-nav" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)',
+      }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <span className="dot-accent" />
           <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
+        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
           <Link href="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
@@ -45,13 +44,22 @@ export default function ContactPage() {
           <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
           <ThemeToggle />
         </div>
+        <button
+          className="psl-hamburger"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </nav>
 
       {/* Content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: 80, padding: '72px 96px' }}>
+      <div className="psl-contact-content" style={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: 80, padding: '72px 96px' }}>
 
         {/* Left: info */}
-        <div style={{ flex: '0 0 360px' }}>
+        <div className="psl-contact-info" style={{ flex: '0 0 360px' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: '#fb397d', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             Get in Touch
           </span>
@@ -94,7 +102,7 @@ export default function ContactPage() {
         </div>
 
         {/* Right: form */}
-        <div style={{ flex: 1, maxWidth: 520 }}>
+        <div className="psl-contact-form" style={{ flex: 1, maxWidth: 520 }}>
           {sent ? (
             <div className="dark-card" style={{ textAlign: 'center', padding: '64px 40px' }}>
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
@@ -109,7 +117,7 @@ export default function ContactPage() {
               </Button>
             </div>
           ) : (
-            <form className="dark-card" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <form className="dark-card" onSubmit={e => { e.preventDefault(); setSent(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {(['name', 'email', 'message'] as const).map(field => (
                 <div key={field}>
                   <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
@@ -143,10 +151,50 @@ export default function ContactPage() {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '18px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)' }}>
+      <div className="psl-footer" style={{ padding: '18px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)' }}>
         <span>PSL · Pakistan Sign Language System</span>
         <span>MediaPipe · Next.js · FastAPI</span>
       </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
 
     </main>
   );

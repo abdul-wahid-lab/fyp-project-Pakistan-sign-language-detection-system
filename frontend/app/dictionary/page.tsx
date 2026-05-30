@@ -140,6 +140,7 @@ export default function DictionaryPage() {
   const [query, setQuery] = useState('');
   const [selectedAlpha, setSelectedAlpha] = useState<{ label: string; index: number } | null>(null);
   const [selectedWord, setSelectedWord] = useState<typeof WORDS[number] | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const activeCategory = CATEGORIES.find(c => c.id === view);
 
@@ -156,7 +157,7 @@ export default function DictionaryPage() {
   /* Search input shared */
   function SearchInput({ placeholder }: { placeholder: string }) {
     return (
-      <div style={{ position: 'relative' }}>
+      <div className="psl-search-wrap" style={{ position: 'relative' }}>
         <svg style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
           width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -164,6 +165,7 @@ export default function DictionaryPage() {
         <input
           type="text" value={query} onChange={e => setQuery(e.target.value)}
           placeholder={placeholder}
+          className="psl-search-input"
           style={{
             background: 'var(--bg-card)', border: '1px solid var(--border-medium)',
             borderRadius: 8, padding: '8px 32px 8px 32px', fontSize: 15, color: 'var(--text)',
@@ -186,12 +188,12 @@ export default function DictionaryPage() {
     <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <span className="dot-accent" />
           <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
+        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
           <Link href="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>About Us</Link>
@@ -205,11 +207,20 @@ export default function DictionaryPage() {
           <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
           <ThemeToggle />
         </div>
+        <button
+          className="psl-hamburger"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </nav>
 
       {/* ── HOME ──────────────────────────────────────────────── */}
       {view === 'home' && (
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 48px' }}>
+        <div className="psl-dict-pad" style={{ flex: 1, overflowY: 'auto', padding: '32px 48px' }}>
           <div style={{ marginBottom: 28 }}>
             <h1 style={{ fontSize: 'clamp(20px, 2.2vw, 30px)', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em', margin: 0 }}>
               PSL Dictionary
@@ -249,8 +260,8 @@ export default function DictionaryPage() {
       {/* ── ALPHABET ──────────────────────────────────────────── */}
       {view === 'alphabet' && (
         <>
-          <div style={{ padding: '20px 48px 0', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div className="psl-dict-subpad" style={{ padding: '20px 48px 0', flexShrink: 0 }}>
+            <div className="psl-dict-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <BackCrumb label="Urdu Alphabet" onBack={goHome} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{filteredAlpha.length} of {ALPHA_SIGNS.length}</span>
@@ -259,7 +270,7 @@ export default function DictionaryPage() {
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '8px 48px 24px' }}>
+          <div className="psl-dict-gridpad" style={{ flex: 1, overflowY: 'auto', padding: '8px 48px 24px' }}>
             {filteredAlpha.length === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--text-muted)', gap: 8 }}>
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -286,8 +297,8 @@ export default function DictionaryPage() {
       {/* ── WORDS ─────────────────────────────────────────────── */}
       {view === 'words' && (
         <>
-          <div style={{ padding: '20px 48px 0', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div className="psl-dict-subpad" style={{ padding: '20px 48px 0', flexShrink: 0 }}>
+            <div className="psl-dict-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <BackCrumb label="Words" onBack={goHome} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{filteredWords.length} of {WORDS.length}</span>
@@ -296,7 +307,7 @@ export default function DictionaryPage() {
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '8px 48px 24px' }}>
+          <div className="psl-dict-gridpad" style={{ flex: 1, overflowY: 'auto', padding: '8px 48px 24px' }}>
             {filteredWords.length === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, color: 'var(--text-muted)', gap: 8 }}>
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -347,20 +358,60 @@ export default function DictionaryPage() {
       )}
 
       {/* Footer */}
-      <div style={{ padding: '14px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)', flexShrink: 0 }}>
+      <div className="psl-footer" style={{ padding: '14px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)', flexShrink: 0 }}>
         <span>PSL · Pakistan Sign Language System</span>
         <span>MediaPipe · Next.js · FastAPI</span>
       </div>
 
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
+
       {/* ── ALPHABET MODAL ────────────────────────────────────── */}
       {selectedAlpha && (
         <div onClick={() => setSelectedAlpha(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
+          <div className="psl-modal-inner" onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
             <Button variant="ghost" onClick={() => setSelectedAlpha(null)}
               style={{ position: 'absolute', top: 14, right: 14, padding: 4, lineHeight: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </Button>
-            <span style={{ fontSize: 72, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1 }}>{selectedAlpha.label}</span>
+            <span className="psl-modal-letter" style={{ fontSize: 72, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1 }}>{selectedAlpha.label}</span>
             <Image src={`/images/alphabet/${selectedAlpha.index}.png`} alt={`Sign for ${selectedAlpha.label}`} width={220} height={220} style={{ objectFit: 'contain' }} />
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sign {selectedAlpha.index} of {ALPHA_SIGNS.length}</span>
           </div>
@@ -370,12 +421,12 @@ export default function DictionaryPage() {
       {/* ── WORD MODAL ────────────────────────────────────────── */}
       {selectedWord && (
         <div onClick={() => setSelectedWord(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
+          <div className="psl-modal-inner" onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-card)', border: '1px solid var(--border-medium)', borderRadius: 16, padding: '32px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, position: 'relative', minWidth: 280 }}>
             <Button variant="ghost" onClick={() => setSelectedWord(null)}
               style={{ position: 'absolute', top: 14, right: 14, padding: 4, lineHeight: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </Button>
-            <span style={{ fontSize: 52, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2 }}>{selectedWord.urdu}</span>
+            <span className="psl-modal-word" style={{ fontSize: 52, fontWeight: 800, color: 'var(--text)', direction: 'rtl', lineHeight: 1.2 }}>{selectedWord.urdu}</span>
             <Image src={`/images/words/${selectedWord.index}.png`} alt={`Sign for ${selectedWord.urdu}`} width={220} height={220} style={{ objectFit: 'contain' }} />
             <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{selectedWord.english}</span>
           </div>

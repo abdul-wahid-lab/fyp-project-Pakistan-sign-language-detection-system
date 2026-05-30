@@ -34,6 +34,7 @@ export default function LearnPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Quiz mode
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quizMode, setQuizMode] = useState(false);
   const [quizIndex, setQuizIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, total: 0 });
@@ -138,10 +139,10 @@ export default function LearnPage() {
   }
 
   return (
-    <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <main className="psl-main-fixed psl-learn-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
@@ -156,16 +157,25 @@ export default function LearnPage() {
           <span style={{ fontWeight: 700, color: 'var(--text)' }}>Learn Signs</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="badge">Pakistan Sign Language</div>
+          <div className="badge psl-nav-badge">Pakistan Sign Language</div>
           <ThemeToggle />
+          <button
+            className="psl-hamburger"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
       </nav>
 
       {/* Body */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className="psl-body psl-learn-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* LEFT: Controls */}
-        <div style={{ width: 380, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div className="psl-sidebar psl-learn-sidebar" style={{ width: 380, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
 
           {/* Mode toggle */}
           <div style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', gap: 3 }}>
@@ -254,9 +264,9 @@ export default function LearnPage() {
         </div>
 
         {/* RIGHT: Camera feed */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
+        <div className="psl-feed psl-learn-feed" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
 
-          <div className="feed-box w-full" style={{ maxWidth: 720, aspectRatio: '4/3', position: 'relative' }}>
+          <div className="feed-box w-full psl-learn-cambox" style={{ maxWidth: 720, aspectRatio: '4/3', position: 'relative' }}>
             <span className="feed-label">Camera Feed</span>
 
             {detecting && (
@@ -281,12 +291,12 @@ export default function LearnPage() {
             )}
 
             {result && (
-              <div style={{
+              <div className="psl-result-overlay" style={{
                 position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
                 display: 'flex', alignItems: 'center', gap: 10,
                 background: result === 'correct' ? 'rgba(34,197,94,0.15)' : 'rgba(251,57,125,0.15)',
                 border: `1px solid ${result === 'correct' ? 'rgba(34,197,94,0.4)' : 'rgba(251,57,125,0.4)'}`,
-                borderRadius: 10, padding: '10px 20px', zIndex: 5, whiteSpace: 'nowrap',
+                borderRadius: 10, padding: '10px 20px', zIndex: 5, whiteSpace: 'nowrap', width: 'max-content', maxWidth: '90%',
               }}>
                 <Image src={result === 'correct' ? '/images/good.png' : '/images/bad.png'} alt={result} width={28} height={28} />
                 <span style={{ fontSize: 16, fontWeight: 700, color: result === 'correct' ? '#4ade80' : '#fb397d' }}>
@@ -296,6 +306,171 @@ export default function LearnPage() {
             )}
           </div>
 
+          {/* Mobile Snapchat overlay */}
+          <div className="psl-mob-controls" style={{
+            position: 'absolute', inset: 0, zIndex: 10,
+            flexDirection: 'column', pointerEvents: 'none',
+          }}>
+            {/* Top bar: Learn/Quiz tabs + score */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 14px',
+              background: 'linear-gradient(rgba(0,0,0,0.55), transparent)',
+              pointerEvents: 'auto',
+            }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={enterLearnMode} style={{
+                  background: !quizMode ? '#fff' : 'rgba(0,0,0,0.55)',
+                  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+                  padding: '6px 14px', color: !quizMode ? '#000' : 'rgba(255,255,255,0.8)',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}>Learn</button>
+                <button onClick={enterQuizMode} style={{
+                  background: quizMode ? '#fff' : 'rgba(0,0,0,0.55)',
+                  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+                  padding: '6px 14px', color: quizMode ? '#000' : 'rgba(255,255,255,0.8)',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}>Quiz</button>
+              </div>
+              {quizMode && (
+                <span style={{
+                  background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.18)',
+                  borderRadius: 20, padding: '6px 14px', color: '#fff', fontSize: 12, fontWeight: 700,
+                }}>{score.correct} / {score.total}</span>
+              )}
+            </div>
+
+            <div style={{ flex: 1 }} />
+
+            {/* Sign image card — picture-in-picture style */}
+            <div style={{ padding: '0 16px 10px', pointerEvents: 'auto' }}>
+              <div style={{
+                background: 'rgba(0,0,0,0.72)',
+                border: `2px solid ${result === 'correct' ? 'rgba(74,222,128,0.55)' : result === 'wrong' ? 'rgba(251,57,125,0.45)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 16,
+                padding: '12px 16px',
+                display: 'flex', alignItems: 'center', gap: 14,
+              }}>
+                {/* Sign image */}
+                <div style={{
+                  width: 80, height: 80, flexShrink: 0, borderRadius: 10,
+                  background: 'rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                }}>
+                  {(!quizMode || showHint) ? (
+                    <Image src={`/images/alphabet/${imageIndex}.png`} alt="Sign" width={80} height={80}
+                      style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
+                  ) : (
+                    <span style={{ fontSize: 40, color: 'rgba(255,255,255,0.15)', fontWeight: 300 }}>?</span>
+                  )}
+                </div>
+
+                {/* Target letter + label */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
+                    {result === 'correct' ? '✓ Correct!' : result === 'wrong' ? '✗ Keep trying' : 'SIGN THIS'}
+                  </div>
+                  <div style={{
+                    fontSize: 42, fontWeight: 800, direction: 'rtl', lineHeight: 1,
+                    color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : '#fff',
+                  }}>{targetLabel}</div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+                {/* Detected letter section */}
+                <div style={{ textAlign: 'center', minWidth: 44, flexShrink: 0 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>DETECTED</div>
+                  <div style={{
+                    fontSize: 32, fontWeight: 800, direction: 'rtl', lineHeight: 1,
+                    color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : 'rgba(255,255,255,0.25)',
+                  }}>{detectedLetter || '—'}</div>
+                </div>
+
+                {/* Hint button (quiz mode only) */}
+                {quizMode && (
+                  <button onClick={() => setShowHint(h => !h)} style={{
+                    background: showHint ? '#fff' : 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
+                    color: showHint ? '#000' : '#fff', fontSize: 11, fontWeight: 600,
+                    padding: '5px 10px', cursor: 'pointer', flexShrink: 0,
+                  }}>Hint</button>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom row: DETECTED | START/STOP | NEXT or SKIP */}
+            <div style={{
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.78) 50%)',
+              padding: '14px 28px 36px',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+              pointerEvents: 'auto',
+            }}>
+              {/* Left: ← prev circle (learn) or spacer (quiz) */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  {!quizMode ? 'PREV' : ''}
+                </span>
+                {!quizMode ? (
+                  <button onClick={prev} disabled={current === 1} style={{
+                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
+                    background: current === 1 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.08)',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    color: current === 1 ? 'rgba(255,255,255,0.2)' : '#fff',
+                    fontSize: 20, cursor: current === 1 ? 'default' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>←</button>
+                ) : (
+                  <div style={{ width: 54, height: 54 }} />
+                )}
+              </div>
+
+              {/* Center: START/STOP */}
+              {!detecting ? (
+                <button onClick={startCamera} style={{
+                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#000', letterSpacing: '0.06em' }}>START</span>
+                </button>
+              ) : (
+                <button onClick={stopCamera} style={{
+                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                }}>
+                  <span style={{ width: 24, height: 24, background: '#000', borderRadius: 4, display: 'block' }} />
+                </button>
+              )}
+
+              {/* Right: NEXT (learn) or SKIP (quiz) */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  {quizMode ? 'SKIP' : 'NEXT'}
+                </span>
+                <button
+                  onClick={quizMode ? () => nextQuizLetter(false) : next}
+                  disabled={!quizMode && current === TOTAL}
+                  style={{
+                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
+                    background: (!quizMode && current === TOTAL) ? 'rgba(255,255,255,0.08)' : '#fff',
+                    border: '2px solid rgba(255,255,255,0.25)',
+                    cursor: (!quizMode && current === TOTAL) ? 'default' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: (!quizMode && current === TOTAL) ? 'rgba(255,255,255,0.3)' : '#000',
+                  }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop start/stop button */}
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
               <Button onClick={startCamera} style={{ width: '100%', height: 50 }}>Start Camera</Button>
@@ -306,6 +481,45 @@ export default function LearnPage() {
 
         </div>
       </div>
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

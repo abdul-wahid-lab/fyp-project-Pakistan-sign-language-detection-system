@@ -16,6 +16,7 @@ export default function SignPage() {
   const [currentWord, setCurrentWord] = useState("");
   const [sentence, setSentence] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastLetterRef = useRef("");
 
@@ -110,9 +111,9 @@ export default function SignPage() {
   }
 
   return (
-    <main style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <main className="psl-main-fixed psl-sign-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
@@ -127,16 +128,25 @@ export default function SignPage() {
           <span style={{ fontWeight: 700, color: 'var(--text)' }}>Sign Detection</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="badge">Pakistan Sign Language</div>
+          <div className="badge psl-nav-badge">Pakistan Sign Language</div>
           <ThemeToggle />
+          <button
+            className="psl-hamburger"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
       </nav>
 
       {/* Body */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className="psl-body psl-sign-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* LEFT: Controls */}
-        <div style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div className="psl-sidebar psl-sign-sidebar" style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
 
           {/* Status */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -237,8 +247,8 @@ export default function SignPage() {
         </div>
 
         {/* RIGHT: Camera feed */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
-          <div className="feed-box w-full" style={{ maxWidth: 720, aspectRatio: '4/3' }}>
+        <div className="psl-feed psl-sign-feed" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
+          <div className="feed-box w-full psl-sign-cambox" style={{ maxWidth: 720, aspectRatio: '4/3' }}>
             <span className="feed-label">Camera Feed</span>
             {detecting && (
               <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
@@ -261,6 +271,152 @@ export default function SignPage() {
             )}
           </div>
 
+          {/* Mobile Snapchat overlay — hidden on desktop via CSS */}
+          <div className="psl-mob-controls" style={{
+            position: 'absolute', inset: 0, zIndex: 10,
+            flexDirection: 'column', pointerEvents: 'none',
+          }}>
+            {/* Top bar: toggle pills */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', padding: '12px 14px',
+              background: 'linear-gradient(rgba(0,0,0,0.55), transparent)',
+              pointerEvents: 'auto',
+            }}>
+              <button onClick={() => setSpeech(s => !s)} style={{
+                background: speech ? '#fff' : 'rgba(0,0,0,0.55)',
+                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+                padding: '6px 16px', color: speech ? '#000' : 'rgba(255,255,255,0.8)',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              }}>Speech {speech ? 'ON' : 'OFF'}</button>
+              <button onClick={() => setWordMode(m => !m)} style={{
+                background: wordMode ? '#fff' : 'rgba(0,0,0,0.55)',
+                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
+                padding: '6px 16px', color: wordMode ? '#000' : 'rgba(255,255,255,0.8)',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              }}>Word {wordMode ? 'ON' : 'OFF'}</button>
+            </div>
+
+            {/* Spacer */}
+            <div style={{ flex: 1 }} />
+
+            {/* Sentence chips */}
+            {sentence.length > 0 && (
+              <div style={{ padding: '0 16px 8px', direction: 'rtl', textAlign: 'right', pointerEvents: 'auto' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end', marginBottom: 6 }}>
+                  {sentence.map((word, i) => (
+                    <span key={i} onClick={() => removeWord(i)} style={{
+                      fontSize: 13, fontWeight: 600, color: '#fff',
+                      background: 'rgba(0,0,0,0.6)', padding: '2px 8px', borderRadius: 6,
+                    }}>{word}</span>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                  <button onClick={() => speakSentence(sentence)} style={{
+                    background: '#fff', border: 'none', borderRadius: 14,
+                    color: '#000', fontSize: 11, fontWeight: 700, padding: '5px 12px', cursor: 'pointer',
+                  }}>▶ Speak</button>
+                  <button onClick={copyToClipboard} style={{
+                    background: 'rgba(255,255,255,0.18)', border: 'none', borderRadius: 14,
+                    color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
+                  }}>{copied ? 'Copied!' : 'Copy'}</button>
+                  <button onClick={() => setSentence([])} style={{
+                    background: 'rgba(255,255,255,0.18)', border: 'none', borderRadius: 14,
+                    color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
+                  }}>Clear</button>
+                </div>
+              </div>
+            )}
+
+            {/* Word bar — only shows current word being built */}
+            <div style={{ padding: '0 16px 10px', pointerEvents: 'auto' }}>
+              <div style={{
+                background: 'rgba(0,0,0,0.68)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 14,
+                padding: '10px 16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div style={{ flex: 1, direction: 'rtl', textAlign: 'right' }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>WORD</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: currentWord ? '#fff' : 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{currentWord || '—'}</div>
+                </div>
+                {currentWord && (
+                  <button onClick={deleteLetter} style={{
+                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 10, color: '#fff', fontSize: 11, fontWeight: 600,
+                    padding: '4px 10px', cursor: 'pointer', flexShrink: 0, marginLeft: 12,
+                  }}>← Del</button>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom row: LETTER circle | START/STOP | ACCEPT/ADD circle */}
+            <div style={{
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.78) 50%)',
+              padding: '14px 28px 36px',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+              pointerEvents: 'auto',
+            }}>
+              {/* Left: LETTER circle */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LETTER</span>
+                <div style={{
+                  width: 54, height: 54, borderRadius: '50%',
+                  background: currentLetter ? '#fff' : 'rgba(255,255,255,0.08)',
+                  border: '2px solid rgba(255,255,255,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: currentLetter ? '#000' : 'rgba(255,255,255,0.3)', direction: 'rtl', lineHeight: 1 }}>
+                    {currentLetter || '—'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Center: START/STOP */}
+              {!detecting ? (
+                <button onClick={startDetection} style={{
+                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#000', letterSpacing: '0.06em' }}>START</span>
+                </button>
+              ) : (
+                <button onClick={handleStop} style={{
+                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                }}>
+                  <span style={{ width: 24, height: 24, background: '#000', borderRadius: 4, display: 'block' }} />
+                </button>
+              )}
+
+              {/* Right: ACCEPT/ADD circle */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  {currentWord ? 'ADD' : 'ACCEPT'}
+                </span>
+                <button
+                  onClick={currentWord ? addWord : acceptLetter}
+                  disabled={!currentLetter && !currentWord}
+                  style={{
+                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
+                    background: (currentLetter || currentWord) ? '#fff' : 'rgba(255,255,255,0.08)',
+                    border: '2px solid rgba(255,255,255,0.25)',
+                    cursor: (currentLetter || currentWord) ? 'pointer' : 'default',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: (currentLetter || currentWord) ? '#000' : 'rgba(255,255,255,0.3)',
+                  }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>{currentWord ? '＋' : '✓'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop start/stop button — hidden on mobile */}
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
               <Button onClick={startDetection} style={{ width: '100%', height: 50 }}>Start Detection</Button>
@@ -271,6 +427,45 @@ export default function SignPage() {
         </div>
 
       </div>
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
+          display: 'flex', flexDirection: 'column', padding: '20px 24px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="dot-accent" />
+              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {[
+            { href: '/about', label: 'About Us' },
+            { href: '/contact', label: 'Contact Us' },
+            { href: '/feedback', label: 'Feedback' },
+            { href: '/dictionary', label: 'Dictionary' },
+            { href: '/sign', label: 'Start Detection' },
+            { href: '/learn', label: 'Learn Signs' },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+              style={{
+                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
+              }}>
+              {label}
+            </Link>
+          ))}
+          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
     </main>
   );
 }
