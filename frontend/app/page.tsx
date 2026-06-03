@@ -80,7 +80,7 @@ export default function Home() {
 
           <div className="psl-hero-btns" style={{ display: 'flex', gap: 12 }}>
             <Link href="/sign" className="psl-hero-btn-link">
-              <Button style={{ height: 50, minWidth: 170, fontSize: 14, width: '100%' }}>
+              <Button style={{ height: 50, fontSize: 14, width: '100%' }}>
                 Start Detection
               </Button>
             </Link>
