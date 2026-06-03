@@ -15,8 +15,8 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
           onMouseLeave={() => setHover(0)}
           style={{ padding: 2, lineHeight: 0 }}>
           <svg width="22" height="22" viewBox="0 0 24 24"
-            fill={(hover || value) >= star ? '#fb397d' : 'none'}
-            stroke={(hover || value) >= star ? '#fb397d' : 'var(--border-strong)'}
+            fill={(hover || value) >= star ? '#f59e0b' : 'none'}
+            stroke={(hover || value) >= star ? '#f59e0b' : 'var(--border-strong)'}
             strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
@@ -45,6 +45,8 @@ export default function FeedbackPage() {
   const [improve, setImprove] = useState('');
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -133,7 +135,24 @@ export default function FeedbackPage() {
               </Button>
             </div>
           ) : (
-            <form className="dark-card" onSubmit={e => { e.preventDefault(); setSubmitted(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form className="dark-card" onSubmit={async e => {
+              e.preventDefault();
+              setSending(true);
+              setError('');
+              try {
+                const res = await fetch('http://localhost:8000/api/feedback', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name, ratings, likes, improve }),
+                });
+                if (!res.ok) throw new Error('Failed');
+                setSubmitted(true);
+              } catch {
+                setError('Something went wrong. Please try again.');
+              } finally {
+                setSending(false);
+              }
+            }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
@@ -164,8 +183,11 @@ export default function FeedbackPage() {
                   onFocus={focusBorder} onBlur={blurBorder} />
               </div>
 
-              <Button type="submit" style={{ width: '100%', height: 44 }}>
-                Submit Feedback
+              {error && (
+                <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{error}</p>
+              )}
+              <Button type="submit" style={{ width: '100%', height: 44, opacity: sending ? 0.6 : 1 }}>
+                {sending ? 'Sending…' : 'Submit Feedback'}
               </Button>
             </form>
           )}

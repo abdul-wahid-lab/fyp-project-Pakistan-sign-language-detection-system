@@ -7,6 +7,8 @@ import { Button } from "../components/Button";
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const inputStyle: React.CSSProperties = {
@@ -117,7 +119,24 @@ export default function ContactPage() {
               </Button>
             </div>
           ) : (
-            <form className="dark-card" onSubmit={e => { e.preventDefault(); setSent(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <form className="dark-card" onSubmit={async e => {
+              e.preventDefault();
+              setSending(true);
+              setError('');
+              try {
+                const res = await fetch('http://localhost:8000/api/contact', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(form),
+                });
+                if (!res.ok) throw new Error('Failed to send');
+                setSent(true);
+              } catch {
+                setError('Something went wrong. Please try again.');
+              } finally {
+                setSending(false);
+              }
+            }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {(['name', 'email', 'message'] as const).map(field => (
                 <div key={field}>
                   <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
@@ -141,8 +160,11 @@ export default function ContactPage() {
                   )}
                 </div>
               ))}
-              <Button type="submit" style={{ width: '100%', height: 50 }}>
-                Send Message
+              {error && (
+                <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{error}</p>
+              )}
+              <Button type="submit" style={{ width: '100%', height: 50, opacity: sending ? 0.6 : 1 }}>
+                {sending ? 'Sending…' : 'Send Message'}
               </Button>
             </form>
           )}

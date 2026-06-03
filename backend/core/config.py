@@ -7,6 +7,12 @@ class Settings(BaseSettings):
     SPEECH_DIR: str = "data/speech"
     CAMERA_INDEX: int = 0
 
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = "cs.abdulwahid@gmail.com"
+    SMTP_PASS: str = ""
+    CONTACT_TO: str = "cs.abdulwahid@gmail.com"
+
     class Config:
         env_file = ".env"
 
