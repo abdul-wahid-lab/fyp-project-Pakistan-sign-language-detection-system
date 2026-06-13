@@ -1,172 +1,92 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { LsPublicNav, LsFooter } from '../components/ls/Components';
+
+const TECH = ['MediaPipe Hands', 'TensorFlow / Keras', 'FastAPI', 'Next.js 14', 'OpenCV', 'SQLite', 'StandardScaler', 'Python'];
+const STATS = [['98.6%', 'Test Accuracy'], ['37', 'Urdu Letters'], ['42', 'Landmark Features'], ['16,745', 'Training Samples']];
+const FEATURES = [
+  {
+    color: 'green',
+    path: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z',
+    extra: <circle cx="12" cy="12" r="3"/>,
+    title: 'Real-Time Detection',
+    desc: 'Webcam-based detection runs at up to 30 FPS, recognising hand gestures with sub-second latency using MediaPipe hand landmarks.',
+  },
+  {
+    color: 'violet',
+    path: 'M22 12 18 12 15 21 9 3 6 12 2 12',
+    title: 'MLP Neural Network',
+    desc: 'A Multi-Layer Perceptron trained on 42 landmark coordinates achieves 98.6% test accuracy across 37 Urdu letters.',
+    isPolyline: true,
+  },
+  {
+    color: 'sky',
+    path: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    title: 'Urdu Speech Output',
+    desc: 'Detected signs are spoken aloud in Urdu using pre-recorded audio, making the system accessible without reading.',
+  },
+];
 
 export default function AboutPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <div className="ls-scope ls-pub-page">
+      <LsPublicNav active="/about" />
 
-      {/* Nav */}
-      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <span className="dot-accent" />
-          <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
-        </Link>
-        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
-          <Link href="/about" style={{ color: 'var(--text)', textDecoration: 'none', fontWeight: 600 }}>About Us</Link>
-          <Link href="/contact" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
-          >Contact Us</Link>
-          <Link href="/feedback" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
-          >Feedback</Link>
-          <Link href="/dictionary" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
-          >Dictionary</Link>
-          <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
-          <ThemeToggle />
-        </div>
-        <button
-          className="psl-hamburger"
-          onClick={() => setMobileMenuOpen(true)}
-          aria-label="Open menu"
-        >
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </nav>
+      <div style={{ padding: 'clamp(48px,6vw,88px) clamp(20px,5vw,96px) 0', maxWidth: 960, width: '100%' }}>
 
-      {/* Hero */}
-      <div className="psl-about-hero" style={{ padding: '72px 96px 48px', maxWidth: 900 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#fb397d', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+        {/* Hero */}
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           About the Project
         </span>
-        <h1 style={{ fontSize: 'clamp(28px, 3.5vw, 50px)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '16px 0 20px' }}>
+        <h1 style={{ fontSize: 'clamp(28px,3.5vw,52px)', margin: '16px 0 20px' }}>
           Making Pakistan Sign Language{' '}
-          <span style={{ color: 'var(--text-faint)' }}>Accessible to Everyone</span>
+          <span style={{ color: 'var(--ink-faint)' }}>Accessible to Everyone</span>
         </h1>
-        <p style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.8, maxWidth: 640 }}>
+        <p style={{ fontSize: 16, color: 'var(--ink-soft)', lineHeight: 1.8, maxWidth: 680, marginBottom: 60 }}>
           This system uses computer vision and machine learning to detect and translate Pakistan Sign Language (PSL)
           gestures in real-time — helping bridge the communication gap between the deaf and hearing communities.
         </p>
-      </div>
 
-      {/* Cards */}
-      <div className="psl-about-cards" style={{ padding: '0 96px 72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900 }}>
-        {[
-          {
-            icon: <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>,
-            circle: <circle cx="12" cy="12" r="3"/>,
-            title: 'Real-Time Detection',
-            desc: 'Webcam-based detection runs at up to 30 FPS, recognising hand gestures with sub-second latency.',
-          },
-          {
-            icon: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,
-            title: 'MLP Model',
-            desc: 'A Multi-Layer Perceptron trained on 42 MediaPipe hand landmark coordinates achieves 98.6% test accuracy across 36 Urdu letters.',
-          },
-          {
-            icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
-            title: 'Urdu Speech Output',
-            desc: 'Detected signs are spoken aloud in Urdu using pre-recorded audio, making the system accessible without reading.',
-          },
-        ].map(({ icon, circle, title, desc }) => (
-          <div key={title} className="dark-card" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(251,57,125,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb397d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {icon}{circle}
-              </svg>
+        {/* Feature cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 56 }}>
+          {FEATURES.map(({ color, path, extra, title, desc, isPolyline }) => (
+            <div key={title} className="card" style={{ padding: 28 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 14, background: `var(--${color}-soft)`, color: `var(--${color})`, display: 'grid', placeItems: 'center', marginBottom: 18 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {isPolyline ? <polyline points={path}/> : <path d={path}/>}
+                  {extra}
+                </svg>
+              </div>
+              <h3 style={{ fontSize: 17, marginBottom: 10 }}>{title}</h3>
+              <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.7 }}>{desc}</p>
             </div>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{title}</h3>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>{desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Tech Stack */}
-      <div className="psl-about-tech" style={{ padding: '0 96px 72px' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-sub)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-          Technology Stack
-        </span>
-        <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
-          {['MediaPipe Hands', 'TensorFlow / Keras', 'FastAPI', 'Next.js 14', 'OpenCV', 'SQLite', 'StandardScaler', 'Python'].map(tech => (
-            <span key={tech} style={{
-              padding: '8px 16px', borderRadius: 6,
-              border: '1px solid var(--border-medium)',
-              fontSize: 13, color: 'var(--text-muted)', fontWeight: 500,
-            }}>{tech}</span>
           ))}
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="psl-about-stats" style={{ padding: '0 96px 72px', display: 'flex', gap: 64 }}>
-        {[['98.6%', 'Test Accuracy'], ['36', 'Urdu Letters'], ['42', 'Landmark Features'], ['16,745', 'Training Samples']].map(([val, label]) => (
-          <div key={label}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.02em' }}>{val}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-sub)', marginTop: 4 }}>{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
-          display: 'flex', flexDirection: 'column', padding: '20px 24px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="dot-accent" />
-              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
-            </div>
-            <button onClick={() => setMobileMenuOpen(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-          {[
-            { href: '/about', label: 'About Us' },
-            { href: '/contact', label: 'Contact Us' },
-            { href: '/feedback', label: 'Feedback' },
-            { href: '/dictionary', label: 'Dictionary' },
-            { href: '/sign', label: 'Start Detection' },
-            { href: '/learn', label: 'Learn Signs' },
-          ].map(({ href, label }) => (
-            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
-              style={{
-                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
-                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
-              }}>
-              {label}
-            </Link>
-          ))}
-          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
-            <ThemeToggle />
+        {/* Tech stack */}
+        <div style={{ marginBottom: 56 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-faint)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Technology Stack
+          </span>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+            {TECH.map(t => (
+              <span key={t} style={{ padding: '8px 16px', borderRadius: 999, border: '1.5px solid var(--line)', fontSize: 13, color: 'var(--ink-soft)', fontFamily: 'var(--font-display)', fontWeight: 500 }}>{t}</span>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Footer */}
-      <div style={{
-        marginTop: 'auto', padding: '18px 48px',
-        borderTop: '1px solid var(--border-subtle)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: 12, color: 'var(--text-faint)',
-      }}>
-        <span>PSL · Pakistan Sign Language System</span>
-        <span>MediaPipe · Next.js · FastAPI</span>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 80 }}>
+          {STATS.map(([val, label]) => (
+            <div key={label} className="card" style={{ padding: '24px 20px', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 34, color: 'var(--primary)', lineHeight: 1 }}>{val}</div>
+              <div style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 8 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
       </div>
 
-    </main>
+      <LsFooter />
+    </div>
   );
 }

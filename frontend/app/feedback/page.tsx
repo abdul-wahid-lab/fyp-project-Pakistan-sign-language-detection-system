@@ -1,30 +1,7 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { Button } from "../components/Button";
-
-function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const [hover, setHover] = useState(0);
-  return (
-    <div style={{ display: 'flex', gap: 4 }}>
-      {[1, 2, 3, 4, 5].map(star => (
-        <Button key={star} variant="ghost" type="button"
-          onClick={() => onChange(star)}
-          onMouseEnter={() => setHover(star)}
-          onMouseLeave={() => setHover(0)}
-          style={{ padding: 2, lineHeight: 0 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24"
-            fill={(hover || value) >= star ? '#f59e0b' : 'none'}
-            stroke={(hover || value) >= star ? '#f59e0b' : 'var(--border-strong)'}
-            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        </Button>
-      ))}
-    </div>
-  );
-}
+import { useState } from 'react';
+import { LsPublicNav, LsFooter } from '../components/ls/Components';
+import * as I from '../components/ls/Icons';
 
 const CATEGORIES = [
   { key: 'accuracy',  label: 'Detection Accuracy' },
@@ -33,11 +10,33 @@ const CATEGORIES = [
   { key: 'overall',   label: 'Overall Experience' },
 ];
 
-const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'var(--bg-card)', border: '1px solid var(--border-medium)',
-  borderRadius: 8, padding: '10px 14px', fontSize: 14, color: 'var(--text)',
-  outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit',
+const fieldStyle: React.CSSProperties = {
+  width: '100%', background: 'var(--surface-2)', border: '1.5px solid var(--line)',
+  borderRadius: 'var(--radius)', padding: '11px 14px', fontSize: 14, color: 'var(--ink)',
+  outline: 'none', transition: 'border-color 0.2s, background 0.2s', fontFamily: 'inherit',
 };
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div style={{ display: 'flex', gap: 4 }}>
+      {[1, 2, 3, 4, 5].map(star => (
+        <button key={star} type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          style={{ padding: 2, lineHeight: 0 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24"
+            fill={(hover || value) >= star ? '#f59e0b' : 'none'}
+            stroke={(hover || value) >= star ? '#f59e0b' : 'var(--line)'}
+            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function FeedbackPage() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -47,70 +46,38 @@ export default function FeedbackPage() {
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    e.currentTarget.style.borderColor = 'var(--border-strong)';
-  }
-  function blurBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    e.currentTarget.style.borderColor = 'var(--border-medium)';
-  }
+  const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = 'var(--primary)';
+    e.currentTarget.style.background = 'var(--surface)';
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = 'var(--line)';
+    e.currentTarget.style.background = 'var(--surface-2)';
+  };
 
   return (
-    <main className="psl-feedback-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <div className="ls-scope" style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+      <LsPublicNav active="/feedback" />
 
-      {/* Nav */}
-      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 48px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <span className="dot-accent" />
-          <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
-        </Link>
-        <div className="psl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: 13 }}>
-          <Link href="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>About Us</Link>
-          <Link href="/contact" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>Contact Us</Link>
-          <Link href="/feedback" style={{ color: 'var(--text)', textDecoration: 'none', fontWeight: 600 }}>Feedback</Link>
-          <Link href="/dictionary" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}>Dictionary</Link>
-          <span style={{ color: 'var(--text-faint)' }}>Pakistan Sign Language</span>
-          <ThemeToggle />
-        </div>
-        <button
-          className="psl-hamburger"
-          onClick={() => setMobileMenuOpen(true)}
-          aria-label="Open menu"
-        >
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </nav>
+      <div style={{ flex: 1, display: 'flex', gap: 'clamp(36px,5vw,72px)', padding: 'clamp(40px,5vw,72px) clamp(20px,5vw,80px)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-      {/* Content */}
-      <div className="psl-feedback-content" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 56, padding: '32px 80px', overflow: 'hidden' }}>
-
-        {/* Left: intro + ratings */}
-        <div className="psl-feedback-left" style={{ flex: '0 0 280px' }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#fb397d', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+        {/* Left: intro + star ratings */}
+        <div style={{ flex: '0 0 300px', minWidth: 260 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Share Your Thoughts
           </span>
-          <h1 style={{ fontSize: 'clamp(24px, 2.5vw, 36px)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.15, letterSpacing: '-0.03em', margin: '12px 0 12px' }}>
-            Help us{' '}
-            <span style={{ color: 'var(--text-faint)' }}>improve PSL</span>
+          <h1 style={{ fontSize: 'clamp(24px,2.8vw,38px)', margin: '14px 0 14px' }}>
+            Help us <span style={{ color: 'var(--ink-faint)' }}>improve PSL</span>
           </h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: 24 }}>
+          <p style={{ fontSize: 13.5, color: 'var(--ink-soft)', lineHeight: 1.75, marginBottom: 28 }}>
             Your feedback shapes the detection system — accuracy, speed, and usability.
           </p>
-
-          {/* Category ratings */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="card" style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Rate each area</div>
             {CATEGORIES.map(({ key, label }) => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{label}</span>
+              <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
                 <StarRating value={ratings[key] ?? 0} onChange={v => setRatings(r => ({ ...r, [key]: v }))} />
               </div>
             ))}
@@ -118,129 +85,76 @@ export default function FeedbackPage() {
         </div>
 
         {/* Right: text form */}
-        <div className="psl-feedback-right" style={{ flex: 1, maxWidth: 480 }}>
+        <div style={{ flex: 1, minWidth: 280, maxWidth: 520 }}>
           {submitted ? (
-            <div className="dark-card" style={{ textAlign: 'center', padding: '56px 40px' }}>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(74,222,128,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <div className="card" style={{ textAlign: 'center', padding: '56px 40px' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 999, background: 'var(--green-soft)', color: 'var(--primary)', display: 'grid', placeItems: 'center', margin: '0 auto 18px' }}>
+                <I.Check size={26} sw={2.5} />
               </div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', marginBottom: 10 }}>Thank You!</h2>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 22, marginBottom: 10 }}>Thank You!</h2>
+              <p style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 26 }}>
                 Your feedback has been recorded. We appreciate you helping us improve.
               </p>
-              <Button onClick={() => { setSubmitted(false); setRatings({}); setLikes(''); setImprove(''); setName(''); }}>
+              <button className="btn btn-primary" onClick={() => { setSubmitted(false); setRatings({}); setLikes(''); setImprove(''); setName(''); }}>
                 Submit Another
-              </Button>
+              </button>
             </div>
           ) : (
-            <form className="dark-card" onSubmit={async e => {
-              e.preventDefault();
-              setSending(true);
-              setError('');
-              try {
-                const res = await fetch('http://localhost:8000/api/feedback', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ name, ratings, likes, improve }),
-                });
-                if (!res.ok) throw new Error('Failed');
-                setSubmitted(true);
-              } catch {
-                setError('Something went wrong. Please try again.');
-              } finally {
-                setSending(false);
-              }
-            }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form className="card" style={{ padding: 30, display: 'flex', flexDirection: 'column', gap: 18 }}
+              onSubmit={async e => {
+                e.preventDefault();
+                setSending(true); setError('');
+                try {
+                  const res = await fetch('http://localhost:8000/api/feedback', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, ratings, likes, improve }),
+                  });
+                  if (!res.ok) throw new Error('Failed');
+                  setSubmitted(true);
+                } catch { setError('Something went wrong. Please try again.'); }
+                finally { setSending(false); }
+              }}>
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
                   Your Name <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
                 </label>
-                <input type="text" style={inputStyle} placeholder="e.g. Ahmed"
+                <input type="text" style={fieldStyle} placeholder="e.g. Ahmed"
                   value={name} onChange={e => setName(e.target.value)}
-                  onFocus={focusBorder} onBlur={blurBorder} />
+                  onFocus={onFocus} onBlur={onBlur} />
               </div>
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
                   What do you like most?
                 </label>
-                <textarea required rows={3} style={{ ...inputStyle, resize: 'none' }}
-                  placeholder="The real-time detection is impressive..."
+                <textarea required rows={3} style={{ ...fieldStyle, resize: 'none' }}
+                  placeholder="The real-time detection is impressive…"
                   value={likes} onChange={e => setLikes(e.target.value)}
-                  onFocus={focusBorder} onBlur={blurBorder} />
+                  onFocus={onFocus} onBlur={onBlur} />
               </div>
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>
                   What could be improved?
                 </label>
-                <textarea required rows={3} style={{ ...inputStyle, resize: 'none' }}
-                  placeholder="It would be great if..."
+                <textarea required rows={3} style={{ ...fieldStyle, resize: 'none' }}
+                  placeholder="It would be great if…"
                   value={improve} onChange={e => setImprove(e.target.value)}
-                  onFocus={focusBorder} onBlur={blurBorder} />
+                  onFocus={onFocus} onBlur={onBlur} />
               </div>
 
-              {error && (
-                <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{error}</p>
-              )}
-              <Button type="submit" style={{ width: '100%', height: 44, opacity: sending ? 0.6 : 1 }}>
+              {error && <p style={{ fontSize: 13, color: 'var(--coral)', margin: 0 }}>{error}</p>}
+              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', opacity: sending ? 0.6 : 1 }}>
                 {sending ? 'Sending…' : 'Submit Feedback'}
-              </Button>
+              </button>
             </form>
           )}
         </div>
 
       </div>
 
-      {/* Footer */}
-      <div className="psl-footer" style={{ padding: '14px 48px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-faint)', flexShrink: 0 }}>
-        <span>PSL · Pakistan Sign Language System</span>
-        <span>MediaPipe · Next.js · FastAPI</span>
-      </div>
-
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
-          display: 'flex', flexDirection: 'column', padding: '20px 24px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="dot-accent" />
-              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
-            </div>
-            <button onClick={() => setMobileMenuOpen(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-          {[
-            { href: '/about', label: 'About Us' },
-            { href: '/contact', label: 'Contact Us' },
-            { href: '/feedback', label: 'Feedback' },
-            { href: '/dictionary', label: 'Dictionary' },
-            { href: '/sign', label: 'Start Detection' },
-            { href: '/learn', label: 'Learn Signs' },
-          ].map(({ href, label }) => (
-            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
-              style={{
-                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
-                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
-              }}>
-              {label}
-            </Link>
-          ))}
-          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
-            <ThemeToggle />
-          </div>
-        </div>
-      )}
-
-    </main>
+      <LsFooter />
+    </div>
   );
 }
