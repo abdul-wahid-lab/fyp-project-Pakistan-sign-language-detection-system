@@ -1,21 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fredoka, Plus_Jakarta_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const fredoka = Fredoka({
+  weight: ['400','500','600','700'],
+  subsets: ['latin'],
+  variable: '--font-fredoka',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const plusJakarta = Plus_Jakarta_Sans({
+  weight: ['400','500','600','700','800'],
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
+
+const notoNastaliq = Noto_Nastaliq_Urdu({
+  weight: ['400','500','700'],
+  subsets: ['arabic'],
+  variable: '--font-nastaliq',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Pakistan Sign Language Interpreter",
-  description: "Detect PSL hand signs using machine learning",
+  title: "LinguaSign — Pakistan Sign Language",
+  description: "Detect and learn Pakistan Sign Language with AI",
 };
 
 export default function RootLayout({
@@ -24,11 +35,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col"><ThemeProvider>{children}</ThemeProvider></body>
+    <html lang="en" className={`${fredoka.variable} ${plusJakarta.variable} ${notoNastaliq.variable} h-full`}>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

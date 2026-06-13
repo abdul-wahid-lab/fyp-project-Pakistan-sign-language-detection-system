@@ -1,525 +1,199 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useState } from 'react';
+import Link from 'next/link';
+import { AppShell, TopBar, Eyebrow } from '../components/ls/Components';
+import * as I from '../components/ls/Icons';
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { Button, TabButton } from "../components/Button";
-
-const API = "http://127.0.0.1:8000/api";
-const TOTAL = 37;
-
-const LABELS: string[] = [
-  "ء","ا","ب","ت","ث","ج","ح","خ","د","ذ",
-  "ر","ز","س","ش","ص","ض","ط","ظ","ع","غ",
-  "ف","ق","ل","م","ن","و","ٹ","پ","چ","ڈ",
-  "ژ","ک","گ","ں","ھ","ی","ے",
+// Real PSL data – 5 words the model actually recognises
+const WORDS_QUIZ = [
+  { image: '/images/words/1.png', ur: 'السلام علیکم', opts: ['السلام علیکم', 'اللہ حافظ', 'باپ', 'ماں'] },
+  { image: '/images/words/2.png', ur: 'اللہ حافظ',    opts: ['میں', 'باپ', 'اللہ حافظ', 'السلام علیکم'] },
+  { image: '/images/words/3.png', ur: 'باپ',           opts: ['ماں', 'باپ', 'میں', 'اللہ حافظ'] },
+  { image: '/images/words/4.png', ur: 'ماں',           opts: ['باپ', 'السلام علیکم', 'میں', 'ماں'] },
+  { image: '/images/words/5.png', ur: 'میں',           opts: ['اللہ حافظ', 'میں', 'باپ', 'ماں'] },
 ];
 
-const normalize = (s: string) => s.replace(/‬/g, "").trim();
+// All 37 PSL letters in order (matches model labels)
+const ALPHA_SIGNS = [
+  { ur: 'ء', img: '/images/alphabet/1.png'  },
+  { ur: 'ا', img: '/images/alphabet/2.png'  },
+  { ur: 'ب', img: '/images/alphabet/3.png'  },
+  { ur: 'پ', img: '/images/alphabet/28.png' },
+  { ur: 'ت', img: '/images/alphabet/4.png'  },
+  { ur: 'ٹ', img: '/images/alphabet/27.png' },
+  { ur: 'ث', img: '/images/alphabet/5.png'  },
+  { ur: 'ج', img: '/images/alphabet/6.png'  },
+  { ur: 'چ', img: '/images/alphabet/29.png' },
+  { ur: 'ح', img: '/images/alphabet/7.png'  },
+  { ur: 'خ', img: '/images/alphabet/8.png'  },
+  { ur: 'د', img: '/images/alphabet/9.png'  },
+  { ur: 'ڈ', img: '/images/alphabet/30.png' },
+  { ur: 'ذ', img: '/images/alphabet/10.png' },
+  { ur: 'ر', img: '/images/alphabet/11.png' },
+  { ur: 'ز', img: '/images/alphabet/12.png' },
+  { ur: 'ژ', img: '/images/alphabet/31.png' },
+  { ur: 'س', img: '/images/alphabet/13.png' },
+  { ur: 'ش', img: '/images/alphabet/14.png' },
+  { ur: 'ص', img: '/images/alphabet/15.png' },
+  { ur: 'ض', img: '/images/alphabet/16.png' },
+  { ur: 'ط', img: '/images/alphabet/17.png' },
+  { ur: 'ظ', img: '/images/alphabet/18.png' },
+  { ur: 'ع', img: '/images/alphabet/19.png' },
+  { ur: 'غ', img: '/images/alphabet/20.png' },
+  { ur: 'ف', img: '/images/alphabet/21.png' },
+  { ur: 'ق', img: '/images/alphabet/22.png' },
+  { ur: 'ک', img: '/images/alphabet/32.png' },
+  { ur: 'گ', img: '/images/alphabet/33.png' },
+  { ur: 'ل', img: '/images/alphabet/23.png' },
+  { ur: 'م', img: '/images/alphabet/24.png' },
+  { ur: 'ن', img: '/images/alphabet/25.png' },
+  { ur: 'ں', img: '/images/alphabet/34.png' },
+  { ur: 'و', img: '/images/alphabet/26.png' },
+  { ur: 'ھ', img: '/images/alphabet/35.png' },
+  { ur: 'ی', img: '/images/alphabet/36.png' },
+  { ur: 'ے', img: '/images/alphabet/37.png' },
+];
 
-function pickRandom(exclude: number) {
-  if (TOTAL <= 1) return 0;
-  let n: number;
-  do { n = Math.floor(Math.random() * TOTAL); } while (n === exclude);
-  return n;
+const COLORS5 = ['green', 'coral', 'violet', 'sky', 'amber'];
+
+const LESSONS = [
+  { title: 'The PSL Alphabet', sub: '37 letters', color: 'green',  Icon: I.Hand, href: '/live-learn' },
+  { title: 'PSL Words',        sub: '5 words',    color: 'violet', Icon: I.Wave, href: '/live-learn' },
+];
+
+// AlphaCard – shows letter; hover reveals its sign image
+function AlphaCard({ sign, color }: { sign: typeof ALPHA_SIGNS[0]; color: string }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Link href="/live-learn"
+      style={{ aspectRatio: '1', borderRadius: 16, background: hovered ? `var(--${color}-soft)` : 'var(--surface-2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, transition: 'all 0.2s', border: '1px solid var(--line)', textDecoration: 'none', overflow: 'hidden', position: 'relative', transform: hovered ? 'translateY(-2px)' : 'none' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}>
+      {hovered ? (
+        <img src={sign.img} alt={sign.ur} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, borderRadius: 16 }} />
+      ) : (
+        <>
+          <span style={{ fontFamily: 'var(--font-urdu)', fontSize: 26, color: 'var(--ink)', lineHeight: 1, paddingBottom: 6 }}>{sign.ur}</span>
+          <I.Hand size={15} sw={1.7} />
+        </>
+      )}
+    </Link>
+  );
+}
+
+function Quiz() {
+  const [q, setQ] = useState(0);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
+  const item = WORDS_QUIZ[q];
+  const answered = picked !== null;
+
+  function pick(opt: string) {
+    if (answered) return;
+    setPicked(opt);
+    if (opt === item.ur) setScore(s => s + 1);
+  }
+  function next() { setPicked(null); setQ(v => (v + 1) % WORDS_QUIZ.length); }
+
+  return (
+    <div className="card" style={{ padding: 26 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+        <Eyebrow icon={I.Target} color="coral">Quick quiz</Eyebrow>
+        <span className="chip" style={{ background: 'var(--amber-soft)', color: 'var(--ink)' }}>
+          <I.Star size={14} /> Score {score}/{WORDS_QUIZ.length}
+        </span>
+      </div>
+      <h3 style={{ fontSize: 22, marginBottom: 6 }}>What does this sign mean?</h3>
+      <p style={{ color: 'var(--ink-faint)', fontSize: 14, marginBottom: 18 }}>Question {q + 1} of {WORDS_QUIZ.length}</p>
+
+      <div style={{ borderRadius: 22, overflow: 'hidden', marginBottom: 20, background: 'var(--surface-2)', border: '1px solid var(--line)' }}>
+        <img src={item.image} alt="PSL sign" style={{ width: '100%', height: 'auto', display: 'block' }} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        {item.opts.map((opt, k) => {
+          let bg = 'var(--surface-2)', col = 'var(--ink)', bd = 'transparent';
+          if (answered) {
+            if (opt === item.ur)               { bg = 'var(--green-soft)'; col = 'var(--primary-ink)'; bd = 'var(--primary)'; }
+            else if (opt === picked)           { bg = 'var(--coral-soft)'; col = 'var(--ink)'; bd = 'var(--coral)'; }
+          }
+          return (
+            <button key={k} onClick={() => pick(opt)}
+              style={{ padding: '15px 16px', borderRadius: 16, fontFamily: 'var(--font-urdu)', fontWeight: 600, fontSize: 18, background: bg, color: col, border: `2px solid ${bd}`, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s', direction: 'rtl' }}>
+              {opt}
+              {answered && opt === item.ur    && <I.Check size={20} sw={3} />}
+              {answered && opt === picked && opt !== item.ur && <I.X size={20} sw={3} />}
+            </button>
+          );
+        })}
+      </div>
+
+      {answered && (
+        <div className="fade-up" style={{ marginTop: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <span style={{ fontWeight: 600, color: picked === item.ur ? 'var(--green-deep)' : 'var(--ink-soft)' }}>
+            {picked === item.ur ? '🎉 Correct! Well done.' : `Correct answer: ${item.ur}`}
+          </span>
+          <button className="btn btn-primary btn-sm" onClick={next}>Next <I.ArrowRight size={17} /></button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LessonCard({ l }: { l: typeof LESSONS[0] }) {
+  const { Icon } = l;
+  return (
+    <Link href={l.href} style={{ textDecoration: 'none' }}>
+      <div style={{ textAlign: 'left', padding: 22, borderRadius: 'var(--radius-lg)', background: 'var(--surface)', border: '1px solid var(--line)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', transition: 'all 0.2s' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-sm)'; }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: `var(--${l.color}-soft)`, color: `var(--${l.color})`, display: 'grid', placeItems: 'center' }}>
+            <Icon size={26} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: `var(--${l.color})` }}>Practice</span>
+        </div>
+        <h3 style={{ fontSize: 19, marginBottom: 4 }}>{l.title}</h3>
+        <p style={{ color: 'var(--ink-faint)', fontSize: 14 }}>{l.sub}</p>
+      </div>
+    </Link>
+  );
 }
 
 export default function LearnPage() {
-  const [current, setCurrent] = useState(1);
-  const [detecting, setDetecting] = useState(false);
-  const [detectedLetter, setDetectedLetter] = useState("");
-  const [result, setResult] = useState<"correct" | "wrong" | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Quiz mode
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [quizMode, setQuizMode] = useState(false);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [score, setScore] = useState({ correct: 0, total: 0 });
-  const [showHint, setShowHint] = useState(false);
-  const roundCorrectRef = useRef(false);
-  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const targetLabel = quizMode ? LABELS[quizIndex] : LABELS[current - 1];
-  const imageIndex = quizMode ? quizIndex + 1 : current;
-
-  function nextQuizLetter(wasCorrect: boolean) {
-    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    setScore(prev => ({ correct: prev.correct + (wasCorrect ? 1 : 0), total: prev.total + 1 }));
-    setQuizIndex(prev => pickRandom(prev));
-    setDetectedLetter("");
-    setResult(null);
-    setShowHint(false);
-    roundCorrectRef.current = false;
-  }
-
-  function enterQuizMode() {
-    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    setQuizMode(true);
-    setQuizIndex(Math.floor(Math.random() * TOTAL));
-    setScore({ correct: 0, total: 0 });
-    setDetectedLetter("");
-    setResult(null);
-    setShowHint(false);
-    roundCorrectRef.current = false;
-  }
-
-  function enterLearnMode() {
-    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    setQuizMode(false);
-    setDetectedLetter("");
-    setResult(null);
-    roundCorrectRef.current = false;
-  }
-
-  async function startCamera() {
-    await fetch(`${API}/start-capture`, { method: "POST" }).catch(() => {});
-    setDetecting(true);
-    setDetectedLetter("");
-    setResult(null);
-  }
-
-  async function stopCamera() {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-    await fetch(`${API}/stop-capture`, { method: "POST" }).catch(() => {});
-    setDetecting(false);
-    setDetectedLetter("");
-    setResult(null);
-  }
-
-  useEffect(() => {
-    if (!detecting) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-    intervalRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`${API}/match`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: 0, speech: 0 }),
-        });
-        const data = await res.json();
-        if (data.label && data.label !== "no match" && data.label !== "no confidence") {
-          const isCorrect = normalize(data.label) === normalize(targetLabel);
-          setDetectedLetter(data.label);
-          if (quizMode) {
-            if (isCorrect && !roundCorrectRef.current) {
-              roundCorrectRef.current = true;
-              setResult("correct");
-              autoAdvanceRef.current = setTimeout(() => nextQuizLetter(true), 1500);
-            } else if (!isCorrect && !roundCorrectRef.current) {
-              setResult("wrong");
-            }
-          } else {
-            setResult(isCorrect ? "correct" : "wrong");
-          }
-        } else {
-          setDetectedLetter("");
-          if (!roundCorrectRef.current) setResult(null);
-        }
-      } catch { /* backend unreachable */ }
-    }, 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [detecting, current, quizMode, quizIndex, targetLabel]);
-
-  function next() {
-    setCurrent(p => Math.min(p + 1, TOTAL));
-    setDetectedLetter("");
-    setResult(null);
-  }
-
-  function prev() {
-    setCurrent(p => Math.max(p - 1, 1));
-    setDetectedLetter("");
-    setResult(null);
-  }
-
   return (
-    <main className="psl-main-fixed psl-learn-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <AppShell>
+      <div className="ls-page">
+        <TopBar title="Learn PSL" sub="Bite-sized lessons, quizzes and practice" />
+        <div style={{ padding: 'clamp(20px,3vw,34px)', display: 'flex', flexDirection: 'column', gap: 26, maxWidth: 1200 }}>
 
-      {/* Nav */}
-      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="dot-accent" />
-          <span style={{ fontWeight: 700, color: 'var(--text)' }}>Learn Signs</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="badge psl-nav-badge">Pakistan Sign Language</div>
-          <ThemeToggle />
-          <button
-            className="psl-hamburger"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-      </nav>
-
-      {/* Body */}
-      <div className="psl-body psl-learn-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-
-        {/* LEFT: Controls */}
-        <div className="psl-sidebar psl-learn-sidebar" style={{ width: 380, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
-
-          {/* Mode toggle */}
-          <div style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: 8, padding: 3, border: '1px solid var(--border)', gap: 3 }}>
-            <TabButton active={!quizMode} onClick={enterLearnMode}>Learn</TabButton>
-            <TabButton active={quizMode} onClick={enterQuizMode}>Quiz</TabButton>
-          </div>
-
-          {/* Quiz score */}
-          {quizMode && (
-            <div className="dark-card" style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Score</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{score.correct} / {score.total}</span>
-            </div>
-          )}
-
-          {/* Target letter */}
           <div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              {quizMode ? 'Sign This Letter' : 'Sign Letter'}
-            </span>
-            <div className="dark-card" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', minHeight: 64 }}>
-              <span style={{ fontSize: 44, fontWeight: 800, color: 'var(--text)', lineHeight: 1, direction: 'rtl' }}>
-                {targetLabel}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 22 }}>Your learning path</h2>
+              <span className="chip" style={{ background: 'var(--violet-soft)', color: 'var(--violet)' }}>37 letters · 5 words</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 16 }}>
+              {LESSONS.map((l, k) => <LessonCard key={k} l={l} />)}
             </div>
           </div>
 
-          {/* Detected letter */}
-          <div>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Detected Letter</span>
-            <div className="dark-card" style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 16px', minHeight: 64 }}>
-              <span style={{
-                fontSize: 40, fontWeight: 700, lineHeight: 1, direction: 'rtl',
-                color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : 'var(--text-ghost)',
-              }}>
-                {detectedLetter || '—'}
-              </span>
-            </div>
-          </div>
-
-          {/* Sign image */}
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Image of Sign</span>
-              {quizMode ? (
-                <Button variant="ghost" onClick={() => setShowHint(h => !h)}
-                  style={{ fontSize: 12, color: showHint ? '#fb397d' : 'var(--text-muted)' }}>
-                  {showHint ? 'Hide Hint' : 'Hint'}
-                </Button>
-              ) : (
-                <span style={{ fontSize: 12, color: 'var(--text-sub)' }}>{current} / {TOTAL}</span>
-              )}
-            </div>
-            <div className="dark-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, minHeight: 150, flex: 1 }}>
-              {(!quizMode || showHint) ? (
-                <Image
-                  src={`/images/alphabet/${imageIndex}.png`}
-                  alt={`Sign ${imageIndex}`}
-                  width={160}
-                  height={160}
-                  style={{ objectFit: 'contain', maxHeight: '100%' }}
-                />
-              ) : (
-                <span style={{ fontSize: 64, color: 'var(--text-ghost)', fontWeight: 300 }}>?</span>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom buttons */}
-          {quizMode ? (
-            <Button variant="ghost" onClick={() => nextQuizLetter(false)}
-              style={{ width: '100%', height: 42, border: '1px solid var(--border)' }}>
-              Skip →
-            </Button>
-          ) : (
-            <div style={{ display: 'flex', gap: 10 }}>
-              <Button onClick={prev} disabled={current === 1} style={{ flex: 1, height: 42 }}>
-                ← Previous
-              </Button>
-              <Button onClick={next} disabled={current === TOTAL} style={{ flex: 1, height: 42 }}>
-                Next →
-              </Button>
-            </div>
-          )}
-
-        </div>
-
-        {/* RIGHT: Camera feed */}
-        <div className="psl-feed psl-learn-feed" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
-
-          <div className="feed-box w-full psl-learn-cambox" style={{ maxWidth: 720, aspectRatio: '4/3', position: 'relative' }}>
-            <span className="feed-label">Camera Feed</span>
-
-            {detecting && (
-              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
-                LIVE
-              </span>
-            )}
-
-            {detecting ? (
-              <img src="http://127.0.0.1:8000/api/stream" alt="Live feed"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'var(--text-ghost)' }}>
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <rect x="2" y="10" width="44" height="32" rx="4" stroke="currentColor" strokeWidth="2"/>
-                  <circle cx="24" cy="26" r="8" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M16 10L19 4H29L32 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <span style={{ fontSize: 13, letterSpacing: '0.05em' }}>Camera inactive</span>
-                <span style={{ fontSize: 11, opacity: 0.6 }}>Press Start Camera to begin</span>
-              </div>
-            )}
-
-            {result && (
-              <div className="psl-result-overlay" style={{
-                position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-                display: 'flex', alignItems: 'center', gap: 10,
-                background: result === 'correct' ? 'rgba(34,197,94,0.15)' : 'rgba(251,57,125,0.15)',
-                border: `1px solid ${result === 'correct' ? 'rgba(34,197,94,0.4)' : 'rgba(251,57,125,0.4)'}`,
-                borderRadius: 10, padding: '10px 20px', zIndex: 5, whiteSpace: 'nowrap', width: 'max-content', maxWidth: '90%',
-              }}>
-                <Image src={result === 'correct' ? '/images/good.png' : '/images/bad.png'} alt={result} width={28} height={28} />
-                <span style={{ fontSize: 16, fontWeight: 700, color: result === 'correct' ? '#4ade80' : '#fb397d' }}>
-                  {result === 'correct' ? 'Correct!' : 'Not correct — keep trying'}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Snapchat overlay */}
-          <div className="psl-mob-controls" style={{
-            position: 'absolute', inset: 0, zIndex: 10,
-            flexDirection: 'column', pointerEvents: 'none',
-          }}>
-            {/* Top bar: Learn/Quiz tabs + score */}
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '12px 14px',
-              background: 'linear-gradient(rgba(0,0,0,0.55), transparent)',
-              pointerEvents: 'auto',
-            }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={enterLearnMode} style={{
-                  background: !quizMode ? '#fff' : 'rgba(0,0,0,0.55)',
-                  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-                  padding: '6px 14px', color: !quizMode ? '#000' : 'rgba(255,255,255,0.8)',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                }}>Learn</button>
-                <button onClick={enterQuizMode} style={{
-                  background: quizMode ? '#fff' : 'rgba(0,0,0,0.55)',
-                  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-                  padding: '6px 14px', color: quizMode ? '#000' : 'rgba(255,255,255,0.8)',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                }}>Quiz</button>
-              </div>
-              {quizMode && (
-                <span style={{
-                  background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.18)',
-                  borderRadius: 20, padding: '6px 14px', color: '#fff', fontSize: 12, fontWeight: 700,
-                }}>{score.correct} / {score.total}</span>
-              )}
-            </div>
-
-            <div style={{ flex: 1 }} />
-
-            {/* Sign image card — picture-in-picture style */}
-            <div style={{ padding: '0 16px 10px', pointerEvents: 'auto' }}>
-              <div style={{
-                background: 'rgba(0,0,0,0.72)',
-                border: `2px solid ${result === 'correct' ? 'rgba(74,222,128,0.55)' : result === 'wrong' ? 'rgba(251,57,125,0.45)' : 'rgba(255,255,255,0.1)'}`,
-                borderRadius: 16,
-                padding: '12px 16px',
-                display: 'flex', alignItems: 'center', gap: 14,
-              }}>
-                {/* Sign image */}
-                <div style={{
-                  width: 80, height: 80, flexShrink: 0, borderRadius: 10,
-                  background: 'rgba(255,255,255,0.06)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                }}>
-                  {(!quizMode || showHint) ? (
-                    <Image src={`/images/alphabet/${imageIndex}.png`} alt="Sign" width={80} height={80}
-                      style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
-                  ) : (
-                    <span style={{ fontSize: 40, color: 'rgba(255,255,255,0.15)', fontWeight: 300 }}>?</span>
-                  )}
-                </div>
-
-                {/* Target letter + label */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-                    {result === 'correct' ? '✓ Correct!' : result === 'wrong' ? '✗ Keep trying' : 'SIGN THIS'}
-                  </div>
-                  <div style={{
-                    fontSize: 42, fontWeight: 800, direction: 'rtl', lineHeight: 1,
-                    color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : '#fff',
-                  }}>{targetLabel}</div>
-                </div>
-
-                {/* Divider */}
-                <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
-
-                {/* Detected letter section */}
-                <div style={{ textAlign: 'center', minWidth: 44, flexShrink: 0 }}>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>DETECTED</div>
-                  <div style={{
-                    fontSize: 32, fontWeight: 800, direction: 'rtl', lineHeight: 1,
-                    color: result === 'correct' ? '#4ade80' : result === 'wrong' ? '#fb397d' : 'rgba(255,255,255,0.25)',
-                  }}>{detectedLetter || '—'}</div>
-                </div>
-
-                {/* Hint button (quiz mode only) */}
-                {quizMode && (
-                  <button onClick={() => setShowHint(h => !h)} style={{
-                    background: showHint ? '#fff' : 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
-                    color: showHint ? '#000' : '#fff', fontSize: 11, fontWeight: 600,
-                    padding: '5px 10px', cursor: 'pointer', flexShrink: 0,
-                  }}>Hint</button>
-                )}
+          <div className="ls-learn-bottom">
+            <Quiz />
+            <div className="card" style={{ padding: 26 }}>
+              <Eyebrow icon={I.Hand} color="green">Alphabet practice</Eyebrow>
+              <h3 style={{ fontSize: 22, margin: '14px 0 4px' }}>All 37 PSL letters</h3>
+              <p style={{ color: 'var(--ink-faint)', fontSize: 14, marginBottom: 18 }}>Hover a letter to see its sign · tap to practise live</p>
+              <div className="ls-alpha-grid">
+                {ALPHA_SIGNS.map((sign, k) => (
+                  <AlphaCard key={k} sign={sign} color={COLORS5[k % 5]} />
+                ))}
               </div>
             </div>
-
-            {/* Bottom row: DETECTED | START/STOP | NEXT or SKIP */}
-            <div style={{
-              background: 'linear-gradient(transparent, rgba(0,0,0,0.78) 50%)',
-              padding: '14px 28px 36px',
-              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-              pointerEvents: 'auto',
-            }}>
-              {/* Left: ← prev circle (learn) or spacer (quiz) */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {!quizMode ? 'PREV' : ''}
-                </span>
-                {!quizMode ? (
-                  <button onClick={prev} disabled={current === 1} style={{
-                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
-                    background: current === 1 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.08)',
-                    border: '2px solid rgba(255,255,255,0.2)',
-                    color: current === 1 ? 'rgba(255,255,255,0.2)' : '#fff',
-                    fontSize: 20, cursor: current === 1 ? 'default' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>←</button>
-                ) : (
-                  <div style={{ width: 54, height: 54 }} />
-                )}
-              </div>
-
-              {/* Center: START/STOP */}
-              {!detecting ? (
-                <button onClick={startCamera} style={{
-                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-                }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#000', letterSpacing: '0.06em' }}>START</span>
-                </button>
-              ) : (
-                <button onClick={stopCamera} style={{
-                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-                }}>
-                  <span style={{ width: 24, height: 24, background: '#000', borderRadius: 4, display: 'block' }} />
-                </button>
-              )}
-
-              {/* Right: NEXT (learn) or SKIP (quiz) */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {quizMode ? 'SKIP' : 'NEXT'}
-                </span>
-                <button
-                  onClick={quizMode ? () => nextQuizLetter(false) : next}
-                  disabled={!quizMode && current === TOTAL}
-                  style={{
-                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
-                    background: (!quizMode && current === TOTAL) ? 'rgba(255,255,255,0.08)' : '#fff',
-                    border: '2px solid rgba(255,255,255,0.25)',
-                    cursor: (!quizMode && current === TOTAL) ? 'default' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: (!quizMode && current === TOTAL) ? 'rgba(255,255,255,0.3)' : '#000',
-                  }}
-                >
-                  <span style={{ fontSize: 20, lineHeight: 1 }}>→</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop start/stop button */}
-          <div style={{ width: '100%', maxWidth: 720 }}>
-            {!detecting ? (
-              <Button onClick={startCamera} style={{ width: '100%', height: 50 }}>Start Camera</Button>
-            ) : (
-              <Button variant="danger" onClick={stopCamera} style={{ width: '100%', height: 50 }}>Stop Camera</Button>
-            )}
           </div>
 
         </div>
       </div>
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
-          display: 'flex', flexDirection: 'column', padding: '20px 24px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="dot-accent" />
-              <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 18, letterSpacing: '-0.02em' }}>PSL</span>
-            </div>
-            <button onClick={() => setMobileMenuOpen(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: 4 }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-          {[
-            { href: '/about', label: 'About Us' },
-            { href: '/contact', label: 'Contact Us' },
-            { href: '/feedback', label: 'Feedback' },
-            { href: '/dictionary', label: 'Dictionary' },
-            { href: '/sign', label: 'Start Detection' },
-            { href: '/learn', label: 'Learn Signs' },
-          ].map(({ href, label }) => (
-            <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
-              style={{
-                fontSize: 22, fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
-                padding: '16px 0', borderBottom: '1px solid var(--border-subtle)',
-              }}>
-              {label}
-            </Link>
-          ))}
-          <div style={{ marginTop: 'auto', paddingTop: 24 }}>
-            <ThemeToggle />
-          </div>
-        </div>
-      )}
-    </main>
+    </AppShell>
   );
 }

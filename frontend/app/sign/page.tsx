@@ -2,12 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { Button } from "../components/Button";
+import { useRouter } from "next/navigation";
+import { Logo, LsThemeToggle } from "../components/ls/Components";
+import * as I from "../components/ls/Icons";
+import { saveDetection } from "../lib/history";
 
 const API = "http://127.0.0.1:8000/api";
 
+function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ width: 50, height: 28, borderRadius: 999, position: 'relative', flexShrink: 0, background: on ? 'var(--primary)' : 'var(--surface-2)', transition: 'background 0.25s', boxShadow: 'inset 0 1px 4px oklch(0 0 0 / 0.1)' }}>
+      <span style={{ position: 'absolute', top: 3, left: on ? 25 : 3, width: 22, height: 22, borderRadius: 999, background: 'white', transition: 'left 0.25s var(--ease)', boxShadow: '0 1px 4px oklch(0 0 0 / 0.25)' }} />
+    </button>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-faint)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{children}</span>;
+}
+
 export default function SignPage() {
+  const router = useRouter();
   const [speech, setSpeech] = useState(false);
   const [wordMode, setWordMode] = useState(false);
   const [detecting, setDetecting] = useState(false);
@@ -30,7 +45,6 @@ export default function SignPage() {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
-
     intervalRef.current = setInterval(async () => {
       try {
         const res = await fetch(`${API}/match`, {
@@ -49,7 +63,6 @@ export default function SignPage() {
         }
       } catch { /* backend unreachable */ }
     }, cooldown);
-
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [detecting, wordMode, speech, cooldown]);
 
@@ -71,11 +84,14 @@ export default function SignPage() {
   }
 
   async function speakSentence(words: string[]) {
-    await speakWord(words.join(" "));
+    const text = words.join(" ");
+    if (text) saveDetection(text, 'Phrase');
+    await speakWord(text);
   }
 
   function addWord() {
     if (!currentWord) return;
+    saveDetection(currentWord, 'Word');
     setSentence(prev => {
       const next = [...prev, currentWord];
       preload(next.join(" "));
@@ -97,7 +113,9 @@ export default function SignPage() {
 
   function copyToClipboard() {
     if (!sentence.length) return;
-    navigator.clipboard.writeText(sentence.join(" ")).then(() => {
+    const text = sentence.join(" ");
+    saveDetection(text, 'Phrase');
+    navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -111,25 +129,25 @@ export default function SignPage() {
   }
 
   return (
-    <main className="psl-main-fixed psl-sign-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
-      {/* Nav */}
-      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.2s' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--text)'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="dot-accent" />
-          <span style={{ fontWeight: 700, color: 'var(--text)' }}>Sign Detection</span>
+    <div className="ls-scope psl-main-fixed psl-sign-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+
+      {/* ── Nav ── */}
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(16px,3vw,36px)', height: 64, borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--ink-soft)', flexShrink: 0 }}>
+            <I.ArrowLeft size={18} />
+          </button>
+          <Link href="/"><Logo size={28} /></Link>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="badge psl-nav-badge">Pakistan Sign Language</div>
-          <ThemeToggle />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          {detecting && (
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.5s ease-in-out infinite' }} />
+          )}
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Sign Detection</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className="chip psl-nav-badge" style={{ background: 'var(--green-soft)', color: 'var(--primary-ink, var(--ink))' }}>Pakistan Sign Language</span>
+          <LsThemeToggle />
           <button
             className="psl-hamburger"
             onClick={() => setMobileMenuOpen(true)}
@@ -142,95 +160,95 @@ export default function SignPage() {
         </div>
       </nav>
 
-      {/* Body */}
+      {/* ── Body ── */}
       <div className="psl-body psl-sign-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* LEFT: Controls */}
-        <div className="psl-sidebar psl-sign-sidebar" style={{ width: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRight: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div className="psl-sidebar psl-sign-sidebar" style={{ width: 390, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 14, padding: 20, borderRight: '1px solid var(--line)', overflowY: 'auto', background: 'var(--bg)' }}>
 
-          {/* Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Status badge */}
+          <div>
             {detecting ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#fb397d', fontWeight: 600 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fb397d', display: 'inline-block', animation: 'pulse-dot 1.5s ease-in-out infinite' }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: 'var(--primary)', fontFamily: 'var(--font-display)', fontWeight: 700, background: 'var(--green-soft)', padding: '5px 12px', borderRadius: 999 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.5s ease-in-out infinite' }} />
                 LIVE
               </span>
             ) : (
-              <span className="badge">Idle</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: 'var(--ink-faint)', fontFamily: 'var(--font-display)', fontWeight: 700, background: 'var(--surface-2)', padding: '5px 12px', borderRadius: 999 }}>
+                Idle
+              </span>
             )}
           </div>
 
           {/* Toggles */}
-          <div className="dark-card" style={{ padding: 0 }}>
-            <div className="toggle-row" style={{ padding: '10px 20px' }}>
-              <label htmlFor="speech">Enable Speech</label>
-              <input id="speech" type="checkbox" className="toggle" checked={speech} onChange={e => setSpeech(e.target.checked)} />
+          <div className="card" style={{ padding: '4px 18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: '1px solid var(--line)' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink)' }}>Enable Speech</span>
+              <Toggle on={speech} onClick={() => setSpeech(s => !s)} />
             </div>
-            <div className="toggle-row" style={{ padding: '10px 20px', borderBottom: 'none' }}>
-              <label htmlFor="wordMode">Word Mode</label>
-              <input id="wordMode" type="checkbox" className="toggle" checked={wordMode} onChange={e => setWordMode(e.target.checked)} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink)' }}>Word Mode</span>
+              <Toggle on={wordMode} onClick={() => setWordMode(m => !m)} />
             </div>
           </div>
 
-          {/* Current Letter */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Detected Letter</span>
-            <div className="dark-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 16px' }}>
-              <span style={{ fontSize: 40, fontWeight: 700, color: currentLetter ? 'var(--text)' : 'var(--text-ghost)', lineHeight: 1, direction: 'rtl' }}>
+          {/* Detected Letter */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <FieldLabel>Detected Letter</FieldLabel>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 16px', minHeight: 72 }}>
+              <span style={{ fontSize: 44, fontWeight: 700, color: currentLetter ? 'var(--ink)' : 'var(--ink-faint)', lineHeight: 1, direction: 'rtl', fontFamily: currentLetter ? 'var(--font-urdu)' : 'inherit' }}>
                 {currentLetter || '—'}
               </span>
             </div>
-            <Button onClick={acceptLetter} disabled={!currentLetter} style={{ width: '100%', height: 42 }}>
+            <button className="btn btn-primary" onClick={acceptLetter} disabled={!currentLetter}
+              style={{ width: '100%', height: 44, opacity: !currentLetter ? 0.45 : 1 }}>
               Accept Letter
-            </Button>
+            </button>
           </div>
 
           {/* Current Word */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Word</span>
+              <FieldLabel>Current Word</FieldLabel>
               {currentWord && (
-                <Button variant="ghost" onClick={deleteLetter} style={{ fontSize: 12 }}>
-                  ← Delete
-                </Button>
+                <button className="btn btn-ghost btn-sm" onClick={deleteLetter}>
+                  <I.ArrowLeft size={14} /> Delete
+                </button>
               )}
             </div>
-            <div className="dark-card" style={{ padding: '10px 16px', minHeight: 48, direction: 'rtl', textAlign: 'right' }}>
-              <span style={{ fontSize: 24, fontWeight: 700, color: currentWord ? 'var(--text)' : 'var(--text-ghost)', letterSpacing: '0.05em' }}>
+            <div className="card" style={{ padding: '12px 16px', minHeight: 56, direction: 'rtl', textAlign: 'right' }}>
+              <span style={{ fontSize: 26, fontWeight: 700, color: currentWord ? 'var(--ink)' : 'var(--ink-faint)', letterSpacing: '0.05em', fontFamily: currentWord ? 'var(--font-urdu)' : 'inherit' }}>
                 {currentWord || '—'}
               </span>
             </div>
-            <Button onClick={addWord} disabled={!currentWord} style={{ width: '100%', height: 42 }}>
+            <button className="btn btn-primary" onClick={addWord} disabled={!currentWord}
+              style={{ width: '100%', height: 44, opacity: !currentWord ? 0.45 : 1 }}>
               Add Word to Sentence
-            </Button>
+            </button>
           </div>
 
           {/* Sentence */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sentence</span>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {sentence.length > 0 && (
-                  <>
-                    <Button variant="ghost" onClick={copyToClipboard}
-                      style={{ fontSize: 12, color: copied ? '#fb397d' : 'var(--text-muted)' }}>
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                    <Button variant="ghost" onClick={() => setSentence([])} style={{ fontSize: 12 }}>
-                      Clear
-                    </Button>
-                  </>
-                )}
-              </div>
+              <FieldLabel>Sentence</FieldLabel>
+              {sentence.length > 0 && (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn btn-ghost btn-sm" onClick={copyToClipboard}
+                    style={{ color: copied ? 'var(--primary)' : 'var(--ink-soft)' }}>
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setSentence([])}>Clear</button>
+                </div>
+              )}
             </div>
-            <div className="dark-card" style={{ padding: 16, minHeight: 80, direction: 'rtl', textAlign: 'right' }}>
+            <div className="card" style={{ padding: 16, minHeight: 88, direction: 'rtl', textAlign: 'right', flex: 1 }}>
               {sentence.length === 0
-                ? <span style={{ color: 'var(--text-ghost)', fontSize: 14 }}>جملہ یہاں ظاہر ہوگا…</span>
+                ? <span style={{ color: 'var(--ink-faint)', fontSize: 14, fontFamily: 'var(--font-urdu)' }}>جملہ یہاں ظاہر ہوگا…</span>
                 : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end' }}>
                     {sentence.map((word, i) => (
                       <span key={i} onClick={() => removeWord(i)} title="Click to remove"
-                        style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)', cursor: 'pointer', padding: '2px 6px', borderRadius: 4, transition: 'background 0.15s' }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(251,57,125,0.2)'}
+                        style={{ fontSize: 20, fontWeight: 600, color: 'var(--ink)', cursor: 'pointer', padding: '2px 8px', borderRadius: 8, transition: 'background 0.15s', fontFamily: 'var(--font-urdu)' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--coral-soft)'}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                       >
                         {word}
@@ -239,39 +257,32 @@ export default function SignPage() {
                   </div>
               }
             </div>
-            <Button onClick={() => speakSentence(sentence)} disabled={sentence.length === 0} style={{ width: '100%', height: 42 }}>
-              Speak Sentence
-            </Button>
+            <button className="btn btn-primary" onClick={() => speakSentence(sentence)} disabled={sentence.length === 0}
+              style={{ width: '100%', height: 44, opacity: sentence.length === 0 ? 0.45 : 1 }}>
+              <I.Volume size={18} /> Speak Sentence
+            </button>
           </div>
 
         </div>
 
         {/* RIGHT: Camera feed */}
-        <div className="psl-feed psl-sign-feed" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, background: 'var(--bg)', gap: 16 }}>
-          <div className="feed-box w-full psl-sign-cambox" style={{ maxWidth: 720, aspectRatio: '4/3' }}>
-            <span className="feed-label">Camera Feed</span>
-            {detecting && (
-              <span style={{ position: 'absolute', top: 14, right: 12, display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: '#fb397d', zIndex: 2 }}>
-                LIVE
-              </span>
-            )}
+        <div className="psl-feed psl-sign-feed" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 28, background: 'var(--bg)', gap: 16, position: 'relative', overflow: 'hidden' }}>
+
+          {/* Feed box */}
+          <div className="psl-sign-cambox" style={{ width: '100%', maxWidth: 720, aspectRatio: '4/3', borderRadius: 20, border: '1px solid var(--line)', background: 'var(--surface)', overflow: 'hidden', position: 'relative' }}>
             {detecting ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src="http://127.0.0.1:8000/api/stream" alt="Live feed" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'var(--text-ghost)' }}>
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <rect x="2" y="10" width="44" height="32" rx="4" stroke="currentColor" strokeWidth="2"/>
-                  <circle cx="24" cy="26" r="8" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M16 10L19 4H29L32 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <span style={{ fontSize: 13, letterSpacing: '0.05em' }}>Camera inactive</span>
-                <span style={{ fontSize: 11, opacity: 0.6 }}>Press Start Detection to begin</span>
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, color: 'var(--ink-faint)' }}>
+                <I.Camera size={56} sw={1.2} />
+                <span style={{ fontSize: 15, fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--ink-soft)' }}>Camera inactive</span>
+                <span style={{ fontSize: 13 }}>Press Start Detection to begin</span>
               </div>
             )}
           </div>
 
-          {/* Mobile Snapchat overlay — hidden on desktop via CSS */}
+          {/* ── MOBILE OVERLAY — DO NOT TOUCH ── */}
           <div className="psl-mob-controls" style={{
             position: 'absolute', inset: 0, zIndex: 10,
             flexDirection: 'column', pointerEvents: 'none',
@@ -327,7 +338,7 @@ export default function SignPage() {
               </div>
             )}
 
-            {/* Word bar — only shows current word being built */}
+            {/* Word bar */}
             <div style={{ padding: '0 16px 10px', pointerEvents: 'auto' }}>
               <div style={{
                 background: 'rgba(0,0,0,0.68)',
@@ -350,14 +361,13 @@ export default function SignPage() {
               </div>
             </div>
 
-            {/* Bottom row: LETTER circle | START/STOP | ACCEPT/ADD circle */}
+            {/* Bottom row: LETTER | START/STOP | ACCEPT/ADD */}
             <div style={{
               background: 'linear-gradient(transparent, rgba(0,0,0,0.78) 50%)',
               padding: '14px 28px 36px',
               display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
               pointerEvents: 'auto',
             }}>
-              {/* Left: LETTER circle */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LETTER</span>
                 <div style={{
@@ -372,7 +382,6 @@ export default function SignPage() {
                 </div>
               </div>
 
-              {/* Center: START/STOP */}
               {!detecting ? (
                 <button onClick={startDetection} style={{
                   width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
@@ -393,7 +402,6 @@ export default function SignPage() {
                 </button>
               )}
 
-              {/* Right: ACCEPT/ADD circle */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {currentWord ? 'ADD' : 'ACCEPT'}
@@ -415,19 +423,27 @@ export default function SignPage() {
               </div>
             </div>
           </div>
+          {/* ── END MOBILE OVERLAY ── */}
 
-          {/* Desktop start/stop button — hidden on mobile */}
+          {/* Desktop start/stop button */}
           <div style={{ width: '100%', maxWidth: 720 }}>
             {!detecting ? (
-              <Button onClick={startDetection} style={{ width: '100%', height: 50 }}>Start Detection</Button>
+              <button className="btn btn-primary" onClick={startDetection}
+                style={{ width: '100%', height: 52, fontSize: 16, gap: 10 }}>
+                <I.Camera size={20} /> Start Detection
+              </button>
             ) : (
-              <Button variant="danger" onClick={handleStop} style={{ width: '100%', height: 50 }}>Stop Detection</Button>
+              <button className="btn btn-primary" onClick={handleStop}
+                style={{ width: '100%', height: 52, fontSize: 16 }}>
+                Stop Detection
+              </button>
             )}
           </div>
         </div>
 
       </div>
-      {/* Mobile menu overlay */}
+
+      {/* ── Mobile menu overlay — DO NOT TOUCH ── */}
       {mobileMenuOpen && (
         <div style={{
           position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 50,
@@ -462,10 +478,10 @@ export default function SignPage() {
             </Link>
           ))}
           <div style={{ marginTop: 'auto', paddingTop: 24 }}>
-            <ThemeToggle />
           </div>
         </div>
       )}
-    </main>
+
+    </div>
   );
 }
