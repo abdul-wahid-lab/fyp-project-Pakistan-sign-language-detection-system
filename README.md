@@ -4,6 +4,21 @@ A real-time Pakistani Sign Language (PSL) recognition system that translates han
 
 ---
 
+## Screenshots
+
+| | |
+|---|---|
+| **Home** | **Dashboard** |
+| ![Home](frontend/public/images/screenshots/home.png) | ![Dashboard](frontend/public/images/screenshots/dashboard.png) |
+| **Sign Detector** | **Learn** |
+| ![Sign Detector](frontend/public/images/screenshots/sign.png) | ![Learn](frontend/public/images/screenshots/learn.png) |
+| **Live Learn** | **Live Quiz** |
+| ![Live Learn](frontend/public/images/screenshots/live-learn.png) | ![Live Quiz](frontend/public/images/screenshots/live-quiz.png) |
+| **Dictionary** | |
+| ![Dictionary](frontend/public/images/screenshots/dictionary.png) | |
+
+---
+
 ## Features
 
 ### Detection
