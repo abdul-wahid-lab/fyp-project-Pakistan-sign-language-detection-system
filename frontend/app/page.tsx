@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Logo, LsThemeToggle, HandSkeleton, Eyebrow, LsFooter } from './components/ls/Components';
+import { LsPublicNav, HandSkeleton, Eyebrow, LsFooter } from './components/ls/Components';
 import * as I from './components/ls/Icons';
 
 const COLORS = ['var(--coral)','var(--violet)','var(--sky)','var(--amber)','var(--green)'];
@@ -13,27 +13,34 @@ const ALPHA_GRADS = [
   'linear-gradient(160deg, oklch(0.7  0.16 292), oklch(0.64 0.15 330))',
   'linear-gradient(160deg, oklch(0.8  0.14 80),  oklch(0.72 0.16 44))',
 ];
+const ALPHA_AURA = [
+  'oklch(0.68 0.15 252)',
+  'oklch(0.68 0.16 175)',
+  'oklch(0.70 0.16 18)',
+  'oklch(0.66 0.18 305)',
+  'oklch(0.74 0.15 65)',
+];
 
 const PSL = [
-  { c:'ء', n:'Hamza',       t:'ʾ'  }, { c:'ا', n:'Alif',        t:'A'  },
-  { c:'ب', n:'Be',          t:'B'  }, { c:'پ', n:'Pe',           t:'P'  },
-  { c:'ت', n:'Te',          t:'T'  }, { c:'ٹ', n:'Ṭe',           t:'Ṭ'  },
-  { c:'ث', n:'Se',          t:'S'  }, { c:'ج', n:'Jeem',         t:'J'  },
-  { c:'چ', n:'Che',         t:'Ch' }, { c:'ح', n:'Baṛī He',      t:'H'  },
-  { c:'خ', n:'Khe',         t:'Kh' }, { c:'د', n:'Dal',          t:'D'  },
-  { c:'ڈ', n:'Ḍal',         t:'Ḍ'  }, { c:'ذ', n:'Zal',          t:'Z'  },
-  { c:'ر', n:'Re',          t:'R'  }, { c:'ز', n:'Ze',           t:'Z'  },
-  { c:'ژ', n:'Zhe',         t:'Zh' }, { c:'س', n:'Seen',         t:'S'  },
-  { c:'ش', n:'Sheen',       t:'Sh' }, { c:'ص', n:'Suad',         t:'S'  },
-  { c:'ض', n:'Zuad',        t:'Z'  }, { c:'ط', n:'Toe',          t:'T'  },
-  { c:'ظ', n:'Zoe',         t:'Z'  }, { c:'ع', n:'Ain',          t:'ʿ'  },
-  { c:'غ', n:'Ghain',       t:'Gh' }, { c:'ف', n:'Fe',           t:'F'  },
-  { c:'ق', n:'Qaf',         t:'Q'  }, { c:'ک', n:'Kaf',          t:'K'  },
-  { c:'گ', n:'Gaf',         t:'G'  }, { c:'ل', n:'Lam',          t:'L'  },
-  { c:'م', n:'Meem',        t:'M'  }, { c:'ن', n:'Noon',         t:'N'  },
-  { c:'ں', n:'Noon Ghunna', t:'N̐'  }, { c:'و', n:'Wao',          t:'W'  },
-  { c:'ھ', n:'Choṭī He',    t:'H'  }, { c:'ی', n:'Ye',           t:'Y'  },
-  { c:'ے', n:'Baṛī Ye',     t:'Ye' },
+  { c:'ء', n:'Hamza',       u:'ہمزہ'       }, { c:'ا', n:'Alif',        u:'الف'        },
+  { c:'ب', n:'Be',          u:'بے'         }, { c:'پ', n:'Pe',           u:'پے'         },
+  { c:'ت', n:'Te',          u:'تے'         }, { c:'ٹ', n:'Ṭe',           u:'ٹے'         },
+  { c:'ث', n:'Se',          u:'ثے'         }, { c:'ج', n:'Jeem',         u:'جیم'        },
+  { c:'چ', n:'Che',         u:'چے'         }, { c:'ح', n:'Baṛī He',      u:'بڑی حے'     },
+  { c:'خ', n:'Khe',         u:'خے'         }, { c:'د', n:'Dal',          u:'دال'        },
+  { c:'ڈ', n:'Ḍal',         u:'ڈال'        }, { c:'ذ', n:'Zal',          u:'ذال'        },
+  { c:'ر', n:'Re',          u:'رے'         }, { c:'ز', n:'Ze',           u:'زے'         },
+  { c:'ژ', n:'Zhe',         u:'ژے'         }, { c:'س', n:'Seen',         u:'سین'        },
+  { c:'ش', n:'Sheen',       u:'شین'        }, { c:'ص', n:'Suad',         u:'صواد'       },
+  { c:'ض', n:'Zuad',        u:'ضواد'       }, { c:'ط', n:'Toe',          u:'طوے'        },
+  { c:'ظ', n:'Zoe',         u:'ظوے'        }, { c:'ع', n:'Ain',          u:'عین'        },
+  { c:'غ', n:'Ghain',       u:'غین'        }, { c:'ف', n:'Fe',           u:'فے'         },
+  { c:'ق', n:'Qaf',         u:'قاف'        }, { c:'ک', n:'Kaf',          u:'کاف'        },
+  { c:'گ', n:'Gaf',         u:'گاف'        }, { c:'ل', n:'Lam',          u:'لام'        },
+  { c:'م', n:'Meem',        u:'میم'        }, { c:'ن', n:'Noon',         u:'نون'        },
+  { c:'ں', n:'Noon Ghunna', u:'نون غنہ'    }, { c:'و', n:'Wao',          u:'واؤ'        },
+  { c:'ھ', n:'Choṭī He',    u:'چھوٹی ہے'   }, { c:'ی', n:'Ye',           u:'یے'         },
+  { c:'ے', n:'Baṛī Ye',     u:'بڑی یے'    },
 ];
 
 // ── Left-gutter hero decoration ────────────────────────────
@@ -45,8 +52,6 @@ function HeroDecor() {
   ];
   return (
     <div className="ls-hero-decor" aria-hidden="true">
-      <div className="ls-decor-glow" style={{ top:'4%', left:'-70px', background:'radial-gradient(circle,oklch(0.74 0.16 158/0.45),transparent 70%)' }} />
-      <div className="ls-decor-glow" style={{ bottom:'2%', left:'10px', width:230, height:230, background:'radial-gradient(circle,oklch(0.66 0.16 292/0.4),transparent 70%)', animationDelay:'1.8s' }} />
       <svg className="ls-decor-path" viewBox="0 0 120 460" preserveAspectRatio="none">
         <path className="march" d="M60 8 C18 92 104 150 56 232 C16 308 100 364 60 452" fill="none" stroke="var(--ink-faint)" strokeWidth={2} strokeDasharray="2 13" strokeLinecap="round" opacity={0.35} />
         <path className="flow"  d="M60 8 C18 92 104 150 56 232 C16 308 100 364 60 452" fill="none" stroke="var(--green)" strokeWidth={3.4} strokeDasharray="26 614" strokeLinecap="round" />
@@ -82,23 +87,34 @@ function AlphabetExplorer() {
   const pick = (i: number) => { setSel(i); setAuto(false); };
   const item = PSL[sel];
   const grad = ALPHA_GRADS[sel % ALPHA_GRADS.length];
+  const aura = ALPHA_AURA[sel % ALPHA_AURA.length];
 
   return (
-    <div className="ls-alpha-explorer">
+    <div style={{ position:'relative' }}>
+      {/* color bleed from card into text section */}
+      <div style={{
+        position:'absolute', inset:0, zIndex:0, pointerEvents:'none',
+        background:`radial-gradient(ellipse 65% 80% at 22% 50%, ${aura} 0%, transparent 70%)`,
+        opacity:0.18, filter:'blur(36px)',
+        transition:'background 0.7s ease',
+      }} />
+    <div className="ls-alpha-explorer" style={{ position:'relative', zIndex:1 }}>
       <div className="ls-alpha-preview" style={{ background: grad }}>
         <div style={{ position:'absolute', inset:0, background:'radial-gradient(120% 80% at 50% 8%, transparent 55%, oklch(0.2 0.04 290/0.4))' }} />
         <span key={'b'+sel} className="pop" style={{ position:'absolute', top:14, left:16, display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:999, background:'rgba(255,255,255,0.18)', backdropFilter:'blur(8px)', color:'white', fontSize:12, fontWeight:700, fontFamily:'var(--font-display)' }}>
           <span style={{ width:7, height:7, borderRadius:9, background:'white', animation:'nodePulse 1.2s infinite' }} /> Tracking
         </span>
         <span key={'l'+sel} className="pop" style={{ position:'absolute', top:12, right:18, fontFamily:'var(--font-urdu)', fontSize:44, color:'white', fontWeight:700, lineHeight:1, paddingBottom:10 }}>{item.c}</span>
-        <div key={'s'+sel} className="pop" style={{ position:'absolute', left:'50%', top:'44%', transform:'translate(-50%,-50%)', width:'62%', height:'68%' }}>
+        <div key={'s'+sel} style={{
+          position:'absolute', left:'8%', right:'8%', top:'18%', bottom:'26%',
+          animation:`handIn${sel % 6} 0.55s cubic-bezier(0.34,1.56,0.64,1) both`,
+        }}>
           <HandSkeleton color="white" accent="oklch(0.85 0.18 100)" />
         </div>
-        <div style={{ position:'absolute', left:14, right:14, bottom:14 }}>
-          <div key={'c'+sel} className="pop" style={{ background:'var(--surface)', borderRadius:18, padding:'12px 16px', boxShadow:'var(--shadow)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
+        <div style={{ position:'absolute', left:14, right:14, bottom:16 }}>
+          <div key={'c'+sel} className="pop" style={{ background:'var(--surface)', borderRadius:18, padding:'12px 16px 16px', boxShadow:'var(--shadow)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
             <div>
-              <div style={{ fontFamily:'var(--font-display)', fontWeight:600, fontSize:18, color:'var(--ink)' }}>{item.n}</div>
-              <div style={{ fontSize:12.5, color:'var(--ink-faint)' }}>Sounds like &ldquo;{item.t}&rdquo;</div>
+              <div style={{ fontFamily:'var(--font-urdu)', fontSize:20, fontWeight:700, color:'var(--ink)', lineHeight:1.6 }}>{item.u}</div>
             </div>
             <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:13, color:'var(--ink-faint)' }}>{sel+1} / {PSL.length}</span>
           </div>
@@ -139,6 +155,7 @@ function AlphabetExplorer() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
@@ -243,24 +260,10 @@ export default function LandingPage() {
     <div className="ls-scope" style={{ minHeight:'100vh', background:'var(--bg)', overflowX:'hidden' }}>
 
       {/* NAV */}
-      <header style={{ position:'sticky', top:0, zIndex:50, display:'flex', alignItems:'center', justifyContent:'space-between',
-        padding:'16px clamp(18px,5vw,64px)', background:'color-mix(in oklch,var(--bg) 80%,transparent)',
-        backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', borderBottom:'1px solid var(--line)' }}>
-        <Logo size={34} />
-        <nav className="ls-navlinks" style={{ display:'flex', alignItems:'center', gap:30 }}>
-          {[{label:'How it works',href:'/how-it-works'},{label:'Dictionary',href:'/dictionary'},{label:'Learn',href:'/learn'},{label:'Contact',href:'/contact'}].map(({ label,href }) => (
-            <Link key={href} href={href} style={{ fontWeight:600, fontSize:15, color:'var(--ink-soft)', textDecoration:'none' }}>{label}</Link>
-          ))}
-        </nav>
-        <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-          <LsThemeToggle />
-          <Link href="/auth" className="btn btn-ghost btn-sm ls-hide-sm">Log in</Link>
-          <Link href="/auth" className="btn btn-primary btn-sm">Get started</Link>
-        </div>
-      </header>
+      <LsPublicNav />
 
       {/* HERO */}
-      <section style={{ position:'relative', overflow:'hidden' }}>
+      <section style={{ position:'relative', overflow:'hidden', background:'radial-gradient(ellipse 80% 65% at 10% 35%, oklch(0.74 0.16 158 / 0.09) 0%, transparent 65%), radial-gradient(ellipse 65% 55% at 88% 72%, oklch(0.66 0.16 292 / 0.07) 0%, transparent 60%)' }}>
         <HeroDecor />
         <div style={{ padding:'clamp(40px,7vw,90px) clamp(18px,5vw,64px) 60px', maxWidth:1240, margin:'0 auto', position:'relative', zIndex:2 }}>
           <div className="ls-hero-grid">

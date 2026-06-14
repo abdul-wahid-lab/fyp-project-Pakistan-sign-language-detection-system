@@ -44,6 +44,7 @@ export const Star    = P('M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.8 6.6 19.5l1.2
 export const Target  = (p: IconProps) => <S {...p}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></S>;
 export const Clock   = (p: IconProps) => <S {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></S>;
 export const Logout  = P('M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 12h9M16 8l3 4-3 4');
+export const Eye     = (p: IconProps) => <S {...p}><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z"/><circle cx="12" cy="12" r="3"/></S>;
 export const Facebook= P('M14 8.5h2V5.5h-2.2A3.3 3.3 0 0 0 10.5 9v2H8.5v3h2v6h3v-6h2.2l.3-3h-2.5V9.2c0-.5.3-.7.8-.7z', { sw: 1.6 });
 export const Twitter = P('M5.5 5.5l5.6 7.4-5.9 5.6M18.5 18.5l-5.6-7.4 5.6-5.6', { sw: 1.8 });
 export const Instagram = (p: IconProps) => <S {...p}><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.6" cy="7.4" r="0.9" fill="currentColor"/></S>;

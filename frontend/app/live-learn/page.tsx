@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { AppShell, TopBar } from '../components/ls/Components';
+import Link from 'next/link';
+import { Logo, LsThemeToggle } from '../components/ls/Components';
 import * as I from '../components/ls/Icons';
 
 const API = "http://127.0.0.1:8000/api";
 
-// image index matches /public/images/alphabet/N.png (same order as dictionary LABELS)
 const ALPHABETS = [
   { label: 'ء', roman: 'Hamza',       image: '/images/alphabet/1.png'  },
   { label: 'ا', roman: 'Alif',        image: '/images/alphabet/2.png'  },
@@ -66,15 +66,19 @@ export default function LiveLearnPage() {
   const [done, setDone]         = useState<number[]>([]);
   const [detected, setDetected] = useState('');
 
-  const pollRef    = useRef<ReturnType<typeof setInterval> | null>(null);
-  const flashRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const idxRef     = useRef(0);   idxRef.current  = idx;
-  const modeRef    = useRef<Mode>('alphabets'); modeRef.current = mode;
-  const phaseRef   = useRef<Phase>('idle');     phaseRef.current = phase;
+  const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const flashRef = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const idxRef   = useRef(0);   idxRef.current  = idx;
+  const modeRef  = useRef<Mode>('alphabets'); modeRef.current = mode;
+  const phaseRef = useRef<Phase>('idle');     phaseRef.current = phase;
 
-  const SIGNS   = mode === 'alphabets' ? ALPHABETS : WORDS;
-  const sign    = SIGNS[idx] ?? SIGNS[0];
+  const SIGNS    = mode === 'alphabets' ? ALPHABETS : WORDS;
+  const sign     = SIGNS[idx] ?? SIGNS[0];
   const progress = (done.length / SIGNS.length) * 100;
+
+  const borderColor =
+    phase === 'correct'   ? 'var(--green)'   :
+    phase === 'detecting' ? 'var(--primary)'  : 'var(--line)';
 
   useEffect(() => () => {
     if (pollRef.current)  clearInterval(pollRef.current);
@@ -107,7 +111,6 @@ export default function LiveLearnPage() {
     setPhase('detecting');
     setDetected('');
     await fetch(`${API}/start-capture`, { method: 'POST' }).catch(() => {});
-
     pollRef.current = setInterval(async () => {
       if (phaseRef.current !== 'detecting') return;
       try {
@@ -142,69 +145,98 @@ export default function LiveLearnPage() {
     setPhase('detecting');
   }
 
-  const borderColor =
-    phase === 'correct'   ? 'var(--green)'   :
-    phase === 'detecting' ? 'var(--primary)'  : 'var(--line)';
+  const isActive = phase !== 'idle';
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <AppShell>
-      <TopBar title="Live Learn" sub="Show the sign on camera — get real-time feedback" />
-      <div style={{ padding: 'clamp(16px,3vw,32px)', display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 960, margin: '0 auto' }}>
+    <div className="ls-scope psl-main-fixed psl-learn-main" style={{
+      height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column'
+    }}>
 
-        {/* Mode toggle */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          {(['alphabets', 'words'] as Mode[]).map(m => (
-            <button key={m} onClick={() => switchMode(m)} style={{
-              padding: '8px 22px', borderRadius: 999, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
-              border: '2px solid', cursor: 'pointer', transition: 'all 0.2s',
-              borderColor: mode === m ? 'var(--primary)' : 'var(--line)',
-              background:  mode === m ? 'var(--green-soft)' : 'var(--surface-2)',
-              color:       mode === m ? 'var(--primary)' : 'var(--ink-soft)',
-            }}>
-              {m === 'alphabets' ? 'Alphabets' : 'Words'}
-            </button>
-          ))}
+      {/* Nav */}
+      <nav className="psl-nav" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 clamp(12px,3vw,36px)', height: 58,
+        borderBottom: '1px solid var(--line)', flexShrink: 0, gap: 8,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <Link href="/learn" style={{
+            width: 34, height: 34, borderRadius: 10, background: 'var(--surface-2)',
+            border: '1px solid var(--line)', display: 'grid', placeItems: 'center',
+            color: 'var(--ink-soft)', flexShrink: 0,
+          }}>
+            <I.ArrowLeft size={17} />
+          </Link>
+          <button onClick={() => setSidebarOpen(v => !v)} style={{
+            width: 34, height: 34, borderRadius: 10, background: sidebarOpen ? 'var(--green-soft)' : 'var(--surface-2)',
+            border: `1px solid ${sidebarOpen ? 'var(--primary)' : 'var(--line)'}`,
+            display: 'grid', placeItems: 'center', color: sidebarOpen ? 'var(--primary)' : 'var(--ink-soft)',
+            cursor: 'pointer', flexShrink: 0,
+          }}>
+            <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+          </button>
+          <Link href="/"><Logo size={26} /></Link>
         </div>
-
-        {/* Progress */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ flex: 1, height: 8, borderRadius: 999, background: 'var(--surface-2)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${progress}%`, background: 'var(--primary)', borderRadius: 999, transition: 'width 0.5s var(--ease)' }} />
-          </div>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
-            {done.length}/{SIGNS.length}
-          </span>
-          {streak > 1 && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--amber)', padding: '3px 10px', background: 'oklch(0.97 0.04 80)', borderRadius: 999 }}>
-              <I.Flame size={14} /> {streak} streak
-            </span>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, justifyContent: 'center' }}>
+          {isActive && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.5s ease-in-out infinite', flexShrink: 0 }} />}
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--ink)', whiteSpace: 'nowrap' }}>Live Learn</span>
+          <span className="chip" style={{ background: 'var(--green-soft)', color: 'var(--primary)', fontSize: 11 }}>PSL</span>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <LsThemeToggle />
+        </div>
+      </nav>
 
-        {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 20 }}>
+      {/* Body */}
+      <div className="psl-body psl-learn-body" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-          {/* Sign panel */}
-          <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.09em', textTransform: 'uppercase' }}>
-              {mode === 'alphabets' ? 'Sign this letter' : 'Sign this word'}
+        {/* Sidebar — hidden on mobile */}
+        <div className="psl-sidebar psl-learn-sidebar" style={{
+          width: sidebarOpen ? 340 : 0, flexShrink: 0, display: 'flex', flexDirection: 'column',
+          borderRight: sidebarOpen ? '1px solid var(--line)' : 'none',
+          overflow: 'hidden', background: 'var(--bg)',
+          transition: 'width 0.25s var(--ease)',
+        }}>
+
+          {/* Fixed top section */}
+          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 20px' }}>
+
+            {/* Mode toggle */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['alphabets', 'words'] as Mode[]).map(m => (
+                <button key={m} onClick={() => switchMode(m)} style={{
+                  padding: '8px 22px', borderRadius: 999, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
+                  border: '2px solid', cursor: 'pointer', transition: 'all 0.2s',
+                  borderColor: mode === m ? 'var(--primary)' : 'var(--line)',
+                  background:  mode === m ? 'var(--green-soft)' : 'var(--surface-2)',
+                  color:       mode === m ? 'var(--primary)' : 'var(--ink-soft)',
+                }}>
+                  {m === 'alphabets' ? 'Alphabets' : 'Words'}
+                </button>
+              ))}
             </div>
 
-            {/* Sign image */}
-            <div style={{
-              width: '100%', borderRadius: 14,
-              border: `3px solid ${borderColor}`,
-              overflow: 'hidden', position: 'relative',
-              aspectRatio: '1',
-              transition: 'border-color 0.3s, box-shadow 0.3s',
-              boxShadow: phase === 'correct'   ? `0 0 0 6px oklch(0.74 0.16 158 / 0.22)` :
-                         phase === 'detecting' ? `0 0 0 6px oklch(0.74 0.16 158 / 0.10)` : 'none',
-            }}>
-              <img
-                src={sign.image}
-                alt={sign.roman}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
+            {/* Progress */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ flex: 1, height: 8, borderRadius: 999, background: 'var(--surface-2)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--primary)', borderRadius: 999, transition: 'width 0.5s var(--ease)' }} />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+                {done.length}/{SIGNS.length}
+              </span>
+              {streak > 1 && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--amber)', padding: '3px 10px', background: 'oklch(0.97 0.04 80)', borderRadius: 999 }}>
+                  <I.Flame size={14} /> {streak}
+                </span>
+              )}
+            </div>
+
+            {/* Sign image — full natural size */}
+            <div style={{ borderRadius: 14, border: `3px solid ${borderColor}`, overflow: 'hidden', position: 'relative', transition: 'border-color 0.3s' }}>
+              <img src={sign.image} alt={sign.roman} style={{ width: '100%', height: 'auto', display: 'block' }} />
               {phase === 'correct' && (
                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,200,100,0.35)', display: 'grid', placeItems: 'center' }}>
                   <span style={{ fontSize: 72, color: 'white', textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>✓</span>
@@ -212,87 +244,209 @@ export default function LiveLearnPage() {
               )}
             </div>
 
-            {/* Urdu label only */}
+            {/* Label + urdu letter */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.09em', textTransform: 'uppercase', textAlign: 'center' }}>
+              {mode === 'alphabets' ? 'Sign this letter' : 'Sign this word'}
+            </div>
             <div style={{ fontFamily: 'var(--font-urdu)', fontSize: 40, lineHeight: 1.3, color: 'var(--ink)', direction: 'rtl', textAlign: 'center' }}>
               {sign.label}
             </div>
-
-            {/* Live detected label */}
             {detected && phase === 'detecting' && (
-              <div style={{ padding: '4px 14px', borderRadius: 999, background: 'var(--surface-2)', fontSize: 13, color: 'var(--ink-soft)' }}>
+              <div style={{ textAlign: 'center', padding: '4px 14px', borderRadius: 999, background: 'var(--surface-2)', fontSize: 13, color: 'var(--ink-soft)' }}>
                 Seeing: <span style={{ fontFamily: 'var(--font-urdu)', fontSize: 18, direction: 'rtl' }}>{detected}</span>
+              </div>
+            )}
+
+            {/* Controls */}
+            {phase !== 'idle' && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={stopAll} className="btn" style={{ flex: 1, background: 'var(--surface-2)', fontWeight: 700 }}>Stop</button>
+                <button onClick={skip} disabled={phase === 'correct'} className="btn" style={{ background: 'var(--surface-2)' }}>Skip</button>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid var(--line)', marginTop: 4 }} />
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-faint)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              {mode === 'alphabets' ? 'All 37 letters' : 'All words'}
+            </div>
+          </div>
+
+          {/* Scrollable letters grid only */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, direction: 'rtl' }}>
+              {SIGNS.map((s, i) => (
+                <button key={s.label} onClick={() => {
+                  if (phase === 'idle') return;
+                  if (flashRef.current) { clearTimeout(flashRef.current); flashRef.current = null; }
+                  setIdx(i); setDetected(''); setPhase('detecting');
+                }} style={{
+                  minWidth: mode === 'words' ? 'auto' : 44,
+                  height: 44,
+                  padding: mode === 'words' ? '0 14px' : '0',
+                  width: mode === 'words' ? 'auto' : 44,
+                  borderRadius: 10, border: '1.5px solid',
+                  borderColor: i === idx && phase !== 'idle' ? 'var(--primary)' : done.includes(i) ? 'var(--green)' : 'var(--line)',
+                  background:  i === idx && phase !== 'idle' ? 'var(--green-soft)' : done.includes(i) ? 'oklch(0.97 0.04 158)' : 'var(--surface-2)',
+                  fontFamily: 'var(--font-urdu)', fontWeight: 700, fontSize: mode === 'words' ? 15 : 20,
+                  color: i === idx && phase !== 'idle' ? 'var(--primary)' : done.includes(i) ? 'var(--green-deep)' : 'var(--ink)',
+                  cursor: phase === 'idle' ? 'default' : 'pointer',
+                  transition: 'all 0.2s', opacity: phase === 'idle' ? 0.5 : 1, direction: 'rtl',
+                }}>{s.label}</button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Camera feed */}
+        <div className="psl-feed psl-learn-feed" style={{
+          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          padding: 28, background: 'var(--bg)', gap: 16, position: 'relative', overflow: 'hidden',
+        }}>
+          {/* Camera box */}
+          <div className="psl-learn-cambox" style={{
+            width: '100%', maxWidth: 720, aspectRatio: '4/3', borderRadius: 20,
+            border: '1px solid var(--line)', background: 'var(--surface)', overflow: 'hidden', position: 'relative',
+          }}>
+            {isActive ? (
+              <img src={`${API}/stream`} alt="Live feed" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, color: 'var(--ink-faint)' }}>
+                <I.Camera size={56} sw={1.2} />
+                <span style={{ fontSize: 15, fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--ink-soft)' }}>Camera inactive</span>
+                <span style={{ fontSize: 13 }}>Press Start to begin</span>
+              </div>
+            )}
+            {isActive && (
+              <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', borderRadius: 999, padding: '4px 12px' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.2s ease-in-out infinite' }} />
+                <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>LIVE</span>
+              </div>
+            )}
+            {phase === 'correct' && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,200,100,0.2)', display: 'grid', placeItems: 'center', pointerEvents: 'none' }}>
+                <div style={{ fontSize: 80, color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>✓</div>
               </div>
             )}
           </div>
 
-          {/* Camera panel */}
-          <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ flex: 1, background: '#0c111a', position: 'relative', minHeight: 300 }}>
-              {phase !== 'idle' ? (
-                <img src={`${API}/stream`} alt="Live feed" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              ) : (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'rgba(255,255,255,0.35)' }}>
-                  <I.Camera size={48} sw={1.2} />
-                  <span style={{ fontSize: 14 }}>Press Start to open camera</span>
-                </div>
-              )}
-              {phase !== 'idle' && (
-                <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', borderRadius: 999, padding: '4px 12px' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.2s ease-in-out infinite' }} />
-                  <span style={{ fontSize: 12, color: 'white', fontWeight: 700 }}>LIVE</span>
-                </div>
-              )}
-              {phase === 'correct' && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,200,100,0.2)', display: 'grid', placeItems: 'center', pointerEvents: 'none' }}>
-                  <div style={{ fontSize: 80, color: 'white', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>✓</div>
-                </div>
-              )}
+          {/* ── Mobile overlay ── */}
+          <div className="psl-mob-controls" style={{ position: 'absolute', inset: 0, zIndex: 10, flexDirection: 'column', pointerEvents: 'none' }}>
+
+            {/* Top: mode pills */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', padding: '10px 12px',
+              background: isActive ? 'linear-gradient(rgba(0,0,0,0.5), transparent)' : 'transparent',
+              pointerEvents: 'auto',
+            }}>
+              {(['alphabets', 'words'] as Mode[]).map(m => (
+                <button key={m} onClick={() => switchMode(m)} style={{
+                  background: isActive ? (mode === m ? '#fff' : 'rgba(0,0,0,0.5)') : (mode === m ? 'var(--primary)' : 'var(--surface)'),
+                  border: isActive ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--line)',
+                  borderRadius: 20, padding: '6px 14px',
+                  color: isActive ? (mode === m ? '#000' : 'rgba(255,255,255,0.85)') : (mode === m ? 'white' : 'var(--ink-soft)'),
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}>
+                  {m === 'alphabets' ? 'Alphabets' : 'Words'}
+                </button>
+              ))}
             </div>
-            <div style={{ padding: '12px 16px', borderTop: '1px solid var(--line)', display: 'flex', gap: 8 }}>
-              {phase === 'idle' ? (
-                <button onClick={startSession} className="btn btn-primary" style={{ flex: 1 }}>
-                  <I.Camera size={17} /> Start
+
+            {/* Progress bar */}
+            <div style={{ padding: '0 12px 6px', pointerEvents: 'auto' }}>
+              <div style={{ height: 4, borderRadius: 999, background: isActive ? 'rgba(255,255,255,0.15)' : 'var(--surface-2)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--primary)', borderRadius: 999, transition: 'width 0.5s' }} />
+              </div>
+              <div style={{ fontSize: 10, color: isActive ? 'rgba(255,255,255,0.5)' : 'var(--ink-faint)', marginTop: 3, textAlign: 'right' }}>
+                {done.length}/{SIGNS.length}
+              </div>
+            </div>
+
+            <div style={{ flex: 1 }} />
+
+            {/* Bottom: LETTER | ⬤ START/STOP | SKIP */}
+            <div style={{
+              background: isActive ? 'linear-gradient(transparent, rgba(0,0,0,0.75) 50%)' : 'linear-gradient(transparent, var(--bg) 60%)',
+              padding: '18px 24px 32px',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+              pointerEvents: 'auto',
+            }}>
+              {/* Letter circle */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: isActive ? 'rgba(255,255,255,0.45)' : 'var(--ink-faint)' }}>
+                  {mode === 'alphabets' ? 'LETTER' : 'WORD'}
+                </span>
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: isActive ? 'rgba(255,255,255,0.1)' : 'var(--surface)',
+                  border: isActive ? '2px solid rgba(255,255,255,0.25)' : '2px solid var(--line)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-urdu)', fontSize: 20, fontWeight: 700, direction: 'rtl', lineHeight: 1, color: isActive ? '#fff' : 'var(--ink)' }}>
+                    {sign.label.length > 2 ? sign.label[0] : sign.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Start / Stop big circle */}
+              {!isActive ? (
+                <button onClick={startSession} style={{
+                  width: 76, height: 76, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--primary)', border: '4px solid var(--green-soft)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 20px oklch(0.74 0.16 158/0.4)',
+                }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'white', letterSpacing: '0.06em' }}>START</span>
                 </button>
               ) : (
-                <>
-                  <button onClick={stopAll} className="btn" style={{ flex: 1, background: 'var(--surface-2)', fontWeight: 700 }}>Stop</button>
-                  <button onClick={skip} disabled={phase === 'correct'} className="btn" style={{ background: 'var(--surface-2)' }}>Skip</button>
-                </>
+                <button onClick={stopAll} style={{
+                  width: 76, height: 76, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '4px solid rgba(255,255,255,0.3)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.45)',
+                }}>
+                  <span style={{ width: 22, height: 22, background: '#111', borderRadius: 4, display: 'block' }} />
+                </button>
               )}
+
+              {/* Skip circle */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: isActive ? 'rgba(255,255,255,0.45)' : 'var(--ink-faint)' }}>
+                  SKIP
+                </span>
+                <button onClick={skip} disabled={!isActive || phase === 'correct'} style={{
+                  width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+                  background: isActive ? 'rgba(255,255,255,0.1)' : 'var(--surface)',
+                  border: isActive ? '2px solid rgba(255,255,255,0.2)' : '2px solid var(--line)',
+                  cursor: isActive && phase !== 'correct' ? 'pointer' : 'default',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: isActive ? '#fff' : 'var(--ink-faint)',
+                  opacity: !isActive ? 0.4 : 1,
+                }}>
+                  <I.ArrowRight size={20} />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+          {/* ── End mobile overlay ── */}
 
-        {/* Sign grid — RTL so Urdu reads right-to-left */}
-        <div className="card" style={{ padding: 20 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-faint)', marginBottom: 14, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            {mode === 'alphabets' ? 'All 37 letters' : 'All words'}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, direction: 'rtl' }}>
-            {SIGNS.map((s, i) => (
-              <button key={s.label} onClick={() => {
-                if (phase === 'idle') return;
-                if (flashRef.current) { clearTimeout(flashRef.current); flashRef.current = null; }
-                setIdx(i); setDetected(''); setPhase('detecting');
-              }} style={{
-                minWidth: mode === 'words' ? 'auto' : 44,
-                height: 44,
-                padding: mode === 'words' ? '0 14px' : '0',
-                width:   mode === 'words' ? 'auto' : 44,
-                borderRadius: 10, border: '1.5px solid',
-                borderColor: i === idx && phase !== 'idle' ? 'var(--primary)' : done.includes(i) ? 'var(--green)' : 'var(--line)',
-                background:  i === idx && phase !== 'idle' ? 'var(--green-soft)' : done.includes(i) ? 'oklch(0.97 0.04 158)' : 'var(--surface-2)',
-                fontFamily: 'var(--font-urdu)', fontWeight: 700, fontSize: mode === 'words' ? 15 : 20,
-                color: i === idx && phase !== 'idle' ? 'var(--primary)' : done.includes(i) ? 'var(--green-deep)' : 'var(--ink)',
-                cursor: phase === 'idle' ? 'default' : 'pointer',
-                transition: 'all 0.2s', opacity: phase === 'idle' ? 0.5 : 1,
-                direction: 'rtl',
-              }}>{s.label}</button>
-            ))}
+          {/* Desktop controls (hidden on mobile via CSS: psl-learn-feed > div:last-child) */}
+          <div style={{ width: '100%', maxWidth: 720, display: 'flex', gap: 8 }}>
+            {phase === 'idle' ? (
+              <button onClick={startSession} className="btn btn-primary" style={{ flex: 1, height: 52, fontSize: 16, gap: 10 }}>
+                <I.Camera size={20} /> Start Learning
+              </button>
+            ) : (
+              <>
+                <button onClick={stopAll} className="btn" style={{ flex: 1, height: 52, background: 'var(--surface-2)', fontWeight: 700 }}>Stop</button>
+                <button onClick={skip} disabled={phase === 'correct'} className="btn" style={{ height: 52, background: 'var(--surface-2)' }}>Skip</button>
+              </>
+            )}
           </div>
         </div>
 
       </div>
-    </AppShell>
+    </div>
   );
 }

@@ -64,7 +64,7 @@ export default function DashboardPage() {
           }
         />
 
-        <div style={{ padding: 'clamp(20px,3vw,34px)', display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 1200 }}>
+        <div style={{ padding: 'clamp(20px,3vw,34px)', display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 1200, width: '100%', boxSizing: 'border-box' }}>
 
           {/* Stats */}
           <div className="ls-stat-grid">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
 
             {/* Weekly activity */}
             <div className="card" style={{ padding: 26 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, gap: 12, flexWrap: 'wrap' }}>
                 <div>
                   <h3 style={{ fontSize: 20 }}>Weekly activity</h3>
                   <p style={{ color: 'var(--ink-faint)', fontSize: 13.5 }}>Signs detected per day</p>
@@ -106,19 +106,19 @@ export default function DashboardPage() {
               )}
 
               {/* Continue learning CTA */}
-              <div style={{ marginTop: 24, padding: 18, borderRadius: 18, background: 'var(--bg-tint)', display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ width: 52, height: 52, borderRadius: 16, background: 'var(--green-soft)', color: 'var(--primary)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <I.Hand size={26} />
+              <div style={{ marginTop: 24, padding: '14px 16px', borderRadius: 18, background: 'var(--bg-tint)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--green-soft)', color: 'var(--primary)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <I.Hand size={22} />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16 }}>
+                <div style={{ flex: 1, minWidth: 120 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15 }}>
                     {total === 0 ? 'Start your first session' : 'Keep practising PSL'}
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 4 }}>
-                    {total === 0 ? '37 letters and 5 words available' : `${total} signs detected so far`}
+                  <div style={{ fontSize: 12.5, color: 'var(--ink-faint)', marginTop: 2 }}>
+                    {total === 0 ? '37 letters · 5 words' : `${total} signs detected so far`}
                   </div>
                 </div>
-                <Link href="/live-learn" className="btn btn-soft btn-sm">Practise</Link>
+                <Link href="/live-learn" className="btn btn-soft btn-sm" style={{ flexShrink: 0 }}>Practise</Link>
               </div>
             </div>
 

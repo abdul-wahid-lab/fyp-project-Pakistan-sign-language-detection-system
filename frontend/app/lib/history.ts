@@ -34,11 +34,19 @@ export function getActivity(): Record<string, number> {
 
 export function getStreak(): number {
   const activity = getActivity();
-  let streak = 0;
   const d = new Date();
-  while (true) {
-    if (activity[dateKey(d)]) { streak++; d.setDate(d.getDate() - 1); }
-    else break;
+  // If nothing today but yesterday has activity, start from yesterday
+  // (user still has today to extend the streak — Duolingo-style grace)
+  if (!activity[dateKey(d)]) {
+    const yesterday = new Date(d);
+    yesterday.setDate(d.getDate() - 1);
+    if (!activity[dateKey(yesterday)]) return 0;
+    d.setDate(d.getDate() - 1);
+  }
+  let streak = 0;
+  while (activity[dateKey(d)]) {
+    streak++;
+    d.setDate(d.getDate() - 1);
   }
   return streak;
 }

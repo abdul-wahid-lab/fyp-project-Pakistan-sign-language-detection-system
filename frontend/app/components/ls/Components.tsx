@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useTheme } from '../ThemeProvider';
 import * as I from './Icons';
 
@@ -104,23 +104,86 @@ const NAV_ITEMS = [
   { key: '/learn',       label: 'Learn',      Icon: I.Book },
   { key: '/live-learn',  label: 'Live Learn', Icon: I.Play },
   { key: '/live-quiz',   label: 'Live Quiz',  Icon: I.Target },
-  { key: '/settings',    label: 'Settings',   Icon: I.Gear },
 ];
+
+function PanelIcon({ flipped }: { flipped?: boolean }) {
+  return (
+    <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+      style={{ transform: flipped ? 'scaleX(-1)' : undefined }}>
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <line x1="9" y1="3" x2="9" y2="21"/>
+    </svg>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { theme } = useTheme();
+  const [collapsed, setCollapsed] = useState(false);
+  const [logoHover, setLogoHover] = useState(false);
+
   return (
-    <aside className="ls-sidebar">
-      <div style={{ padding: '4px 8px 22px' }}>
-        <Link href="/"><Logo size={32} /></Link>
+    <aside className="ls-sidebar" style={{
+      width: collapsed ? 62 : 248,
+      padding: collapsed ? '22px 10px' : '22px 16px',
+      transition: 'width 0.25s ease, padding 0.25s ease',
+      overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', padding: '4px 0 22px', gap: 8 }}>
+        {collapsed ? (
+          /* Collapsed: hand icon morphs into unfold button on hover */
+          <button
+            onClick={() => setCollapsed(false)}
+            onMouseEnter={() => setLogoHover(true)}
+            onMouseLeave={() => setLogoHover(false)}
+            title="Expand sidebar"
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+          >
+            {logoHover ? (
+              <div style={{
+                width: 32, height: 32, borderRadius: 9,
+                background: 'var(--green-soft)', border: '1px solid var(--primary)',
+                display: 'grid', placeItems: 'center', color: 'var(--primary)',
+                transition: 'all 0.15s',
+              }}>
+                <PanelIcon flipped />
+              </div>
+            ) : (
+              <div style={{
+                width: 32, height: 32, borderRadius: 32 * 0.34,
+                background: 'linear-gradient(135deg, var(--green), var(--green-deep))',
+                display: 'grid', placeItems: 'center', color: 'white',
+                boxShadow: '0 6px 16px oklch(0.74 0.16 158 / 0.4)', transform: 'rotate(-4deg)',
+                transition: 'all 0.15s',
+              }}>
+                <I.Hand size={20} sw={1.9} />
+              </div>
+            )}
+          </button>
+        ) : (
+          /* Expanded: logo + collapse button */
+          <>
+            <Link href="/"><Logo size={32} /></Link>
+            <button onClick={() => setCollapsed(true)} title="Collapse sidebar" style={{
+              width: 30, height: 30, borderRadius: 8, background: 'var(--surface-2)',
+              border: '1px solid var(--line)', display: 'grid', placeItems: 'center',
+              color: 'var(--ink-soft)', cursor: 'pointer', flexShrink: 0,
+            }}>
+              <PanelIcon />
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Nav links */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
         {NAV_ITEMS.map(({ key, label, Icon }) => {
           const active = pathname === key;
           return (
-            <Link key={key} href={key} style={{
-              display: 'flex', alignItems: 'center', gap: 13, padding: '12px 15px',
+            <Link key={key} href={key} title={collapsed ? label : undefined} style={{
+              display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 13,
+              padding: collapsed ? '12px 0' : '12px 15px',
+              justifyContent: collapsed ? 'center' : undefined,
               borderRadius: 'var(--radius)', fontFamily: 'var(--font-display)', fontWeight: 600,
               fontSize: 15.5, textDecoration: 'none',
               color: active ? 'var(--on-primary)' : 'var(--ink-soft)',
@@ -128,24 +191,13 @@ export function Sidebar() {
               boxShadow: active ? '0 6px 16px oklch(0.74 0.16 158 / 0.3)' : 'none',
               transition: 'all 0.2s',
             }}>
-              <Icon size={21} sw={active ? 2.3 : 2} />{label}
+              <Icon size={21} sw={active ? 2.3 : 2} />
+              {!collapsed && label}
             </Link>
           );
         })}
       </nav>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 14, borderRadius: 'var(--radius)', background: 'var(--surface-2)', marginTop: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <Avatar size={36} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Guest</div>
-            <div style={{ fontSize: 11.5, color: 'var(--ink-faint)' }}>Learner</div>
-          </div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px', marginTop: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-faint)' }}>{theme === 'dark' ? 'Dark' : 'Light'}</span>
-        <LsThemeToggle />
-      </div>
+
     </aside>
   );
 }
@@ -238,18 +290,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 /* ── Top bar (used inside app pages) ───────────────────── */
-export function TopBar({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
+export function TopBar({ title, sub, action, titleHref }: { title: string; sub?: string; action?: React.ReactNode; titleHref?: string }) {
   return (
     <div className="ls-topbar">
       <div>
-        <h1 style={{ fontSize: 26 }}>{title}</h1>
-        {sub && <p style={{ color: 'var(--ink-faint)', fontSize: 14.5, marginTop: 2 }}>{sub}</p>}
+        {titleHref
+          ? <Link href={titleHref} style={{ textDecoration: 'none', color: 'inherit' }}><h1 className="ls-topbar-title">{title}</h1></Link>
+          : <h1 className="ls-topbar-title">{title}</h1>
+        }
+        {sub && <p className="ls-topbar-sub" style={{ color: 'var(--ink-faint)', fontSize: 14.5, marginTop: 2 }}>{sub}</p>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <button className="ls-icon-btn" title="Notifications"><I.Bell size={21} /></button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button className="ls-icon-btn ls-topbar-bell" title="Notifications"><I.Bell size={21} /></button>
         <LsThemeToggle />
         {action}
-        <Avatar size={40} />
+        <span className="ls-topbar-avatar"><Avatar size={40} /></span>
       </div>
     </div>
   );
@@ -289,6 +344,7 @@ export function LsPublicNav({ active }: { active?: string }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <LsThemeToggle />
+          <Link href="/auth" className="btn btn-ghost btn-sm ls-hide-sm" style={{ textDecoration: 'none' }}>Log in</Link>
           <Link href="/auth" className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>Get started</Link>
           <button onClick={() => setOpen(true)} aria-label="Menu" className="ls-pub-hamburger">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">

@@ -165,7 +165,7 @@ export default function LearnPage() {
   return (
     <AppShell>
       <div className="ls-page">
-        <TopBar title="Learn PSL" sub="Bite-sized lessons, quizzes and practice" />
+        <TopBar title="Learn PSL" sub="Bite-sized lessons, quizzes and practice" titleHref="/" />
         <div style={{ padding: 'clamp(20px,3vw,34px)', display: 'flex', flexDirection: 'column', gap: 26, maxWidth: 1200 }}>
 
           <div>
@@ -179,7 +179,6 @@ export default function LearnPage() {
           </div>
 
           <div className="ls-learn-bottom">
-            <Quiz />
             <div className="card" style={{ padding: 26 }}>
               <Eyebrow icon={I.Hand} color="green">Alphabet practice</Eyebrow>
               <h3 style={{ fontSize: 22, margin: '14px 0 4px' }}>All 37 PSL letters</h3>
@@ -190,6 +189,7 @@ export default function LearnPage() {
                 ))}
               </div>
             </div>
+            <Quiz />
           </div>
 
         </div>
