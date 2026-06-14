@@ -132,31 +132,20 @@ export default function SignPage() {
     <div className="ls-scope psl-main-fixed psl-sign-main" style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
       {/* ── Nav ── */}
-      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(16px,3vw,36px)', height: 64, borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--ink-soft)', flexShrink: 0 }}>
-            <I.ArrowLeft size={18} />
+      <nav className="psl-nav" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(12px,3vw,36px)', height: 58, borderBottom: '1px solid var(--line)', flexShrink: 0, gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <button onClick={() => router.back()} style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: 'var(--ink-soft)', flexShrink: 0 }}>
+            <I.ArrowLeft size={17} />
           </button>
-          <Link href="/"><Logo size={28} /></Link>
+          <Link href="/"><Logo size={26} /></Link>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          {detecting && (
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.5s ease-in-out infinite' }} />
-          )}
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Sign Detection</span>
+        <div className="psl-nav-badge" style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, justifyContent: 'center' }}>
+          {detecting && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block', animation: 'nodePulse 1.5s ease-in-out infinite', flexShrink: 0 }} />}
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--ink)', whiteSpace: 'nowrap' }}>Sign Detection</span>
+          <span className="chip" style={{ background: 'var(--green-soft)', color: 'var(--primary-ink, var(--ink))', fontSize: 11 }}>PSL</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span className="chip psl-nav-badge" style={{ background: 'var(--green-soft)', color: 'var(--primary-ink, var(--ink))' }}>Pakistan Sign Language</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <LsThemeToggle />
-          <button
-            className="psl-hamburger"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <path d="M3 5h16M3 11h16M3 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
         </div>
       </nav>
 
@@ -282,80 +271,93 @@ export default function SignPage() {
             )}
           </div>
 
-          {/* ── MOBILE OVERLAY — DO NOT TOUCH ── */}
+          {/* ── MOBILE OVERLAY ── */}
           <div className="psl-mob-controls" style={{
             position: 'absolute', inset: 0, zIndex: 10,
             flexDirection: 'column', pointerEvents: 'none',
           }}>
             {/* Top bar: toggle pills */}
             <div style={{
-              display: 'flex', justifyContent: 'space-between', padding: '12px 14px',
-              background: 'linear-gradient(rgba(0,0,0,0.55), transparent)',
+              display: 'flex', justifyContent: 'space-between', padding: '10px 12px',
+              background: detecting ? 'linear-gradient(rgba(0,0,0,0.5), transparent)' : 'transparent',
               pointerEvents: 'auto',
             }}>
               <button onClick={() => setSpeech(s => !s)} style={{
-                background: speech ? '#fff' : 'rgba(0,0,0,0.55)',
-                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-                padding: '6px 16px', color: speech ? '#000' : 'rgba(255,255,255,0.8)',
-                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                background: detecting ? (speech ? '#fff' : 'rgba(0,0,0,0.5)') : (speech ? 'var(--primary)' : 'var(--surface)'),
+                border: detecting ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--line)',
+                borderRadius: 20, padding: '6px 14px',
+                color: detecting ? (speech ? '#000' : 'rgba(255,255,255,0.85)') : (speech ? 'var(--on-primary)' : 'var(--ink-soft)'),
+                fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: detecting ? 'none' : 'var(--shadow-sm)',
               }}>Speech {speech ? 'ON' : 'OFF'}</button>
               <button onClick={() => setWordMode(m => !m)} style={{
-                background: wordMode ? '#fff' : 'rgba(0,0,0,0.55)',
-                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 20,
-                padding: '6px 16px', color: wordMode ? '#000' : 'rgba(255,255,255,0.8)',
-                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                background: detecting ? (wordMode ? '#fff' : 'rgba(0,0,0,0.5)') : (wordMode ? 'var(--primary)' : 'var(--surface)'),
+                border: detecting ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--line)',
+                borderRadius: 20, padding: '6px 14px',
+                color: detecting ? (wordMode ? '#000' : 'rgba(255,255,255,0.85)') : (wordMode ? 'var(--on-primary)' : 'var(--ink-soft)'),
+                fontSize: 12, fontWeight: 600, cursor: 'pointer', boxShadow: detecting ? 'none' : 'var(--shadow-sm)',
               }}>Word {wordMode ? 'ON' : 'OFF'}</button>
             </div>
 
-            {/* Spacer */}
             <div style={{ flex: 1 }} />
 
             {/* Sentence chips */}
             {sentence.length > 0 && (
-              <div style={{ padding: '0 16px 8px', direction: 'rtl', textAlign: 'right', pointerEvents: 'auto' }}>
+              <div style={{ padding: '0 14px 8px', direction: 'rtl', textAlign: 'right', pointerEvents: 'auto' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end', marginBottom: 6 }}>
                   {sentence.map((word, i) => (
                     <span key={i} onClick={() => removeWord(i)} style={{
-                      fontSize: 13, fontWeight: 600, color: '#fff',
-                      background: 'rgba(0,0,0,0.6)', padding: '2px 8px', borderRadius: 6,
+                      fontSize: 13, fontWeight: 600,
+                      color: detecting ? '#fff' : 'var(--ink)',
+                      background: detecting ? 'rgba(0,0,0,0.55)' : 'var(--surface)',
+                      border: detecting ? 'none' : '1px solid var(--line)',
+                      padding: '3px 10px', borderRadius: 8, cursor: 'pointer',
+                      fontFamily: 'var(--font-urdu)',
                     }}>{word}</span>
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                   <button onClick={() => speakSentence(sentence)} style={{
-                    background: '#fff', border: 'none', borderRadius: 14,
-                    color: '#000', fontSize: 11, fontWeight: 700, padding: '5px 12px', cursor: 'pointer',
+                    background: detecting ? '#fff' : 'var(--primary)', border: 'none', borderRadius: 14,
+                    color: detecting ? '#000' : 'var(--on-primary)',
+                    fontSize: 11, fontWeight: 700, padding: '5px 12px', cursor: 'pointer',
                   }}>▶ Speak</button>
                   <button onClick={copyToClipboard} style={{
-                    background: 'rgba(255,255,255,0.18)', border: 'none', borderRadius: 14,
-                    color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
+                    background: detecting ? 'rgba(255,255,255,0.18)' : 'var(--surface)', border: detecting ? 'none' : '1px solid var(--line)', borderRadius: 14,
+                    color: detecting ? '#fff' : 'var(--ink-soft)',
+                    fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
                   }}>{copied ? 'Copied!' : 'Copy'}</button>
                   <button onClick={() => setSentence([])} style={{
-                    background: 'rgba(255,255,255,0.18)', border: 'none', borderRadius: 14,
-                    color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
+                    background: detecting ? 'rgba(255,255,255,0.18)' : 'var(--surface)', border: detecting ? 'none' : '1px solid var(--line)', borderRadius: 14,
+                    color: detecting ? '#fff' : 'var(--ink-soft)',
+                    fontSize: 11, fontWeight: 600, padding: '5px 12px', cursor: 'pointer',
                   }}>Clear</button>
                 </div>
               </div>
             )}
 
             {/* Word bar */}
-            <div style={{ padding: '0 16px 10px', pointerEvents: 'auto' }}>
+            <div style={{ padding: '0 14px 10px', pointerEvents: 'auto' }}>
               <div style={{
-                background: 'rgba(0,0,0,0.68)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 14,
-                padding: '10px 16px',
+                background: detecting ? 'rgba(0,0,0,0.65)' : 'var(--surface)',
+                border: detecting ? '1px solid rgba(255,255,255,0.08)' : '1px solid var(--line)',
+                borderRadius: 14, padding: '10px 14px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                boxShadow: detecting ? 'none' : 'var(--shadow-sm)',
               }}>
                 <div style={{ flex: 1, direction: 'rtl', textAlign: 'right' }}>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>WORD</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: currentWord ? '#fff' : 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{currentWord || '—'}</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3,
+                    color: detecting ? 'rgba(255,255,255,0.4)' : 'var(--ink-faint)' }}>WORD</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1, fontFamily: currentWord ? 'var(--font-urdu)' : 'inherit',
+                    color: currentWord ? (detecting ? '#fff' : 'var(--ink)') : (detecting ? 'rgba(255,255,255,0.2)' : 'var(--ink-faint)') }}>
+                    {currentWord || '—'}
+                  </div>
                 </div>
                 {currentWord && (
                   <button onClick={deleteLetter} style={{
-                    background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 10, color: '#fff', fontSize: 11, fontWeight: 600,
-                    padding: '4px 10px', cursor: 'pointer', flexShrink: 0, marginLeft: 12,
+                    background: detecting ? 'rgba(255,255,255,0.1)' : 'var(--surface-2)',
+                    border: detecting ? '1px solid rgba(255,255,255,0.12)' : '1px solid var(--line)',
+                    borderRadius: 10, color: detecting ? '#fff' : 'var(--ink-soft)',
+                    fontSize: 11, fontWeight: 600, padding: '4px 10px', cursor: 'pointer', flexShrink: 0, marginLeft: 10,
                   }}>← Del</button>
                 )}
               </div>
@@ -363,59 +365,67 @@ export default function SignPage() {
 
             {/* Bottom row: LETTER | START/STOP | ACCEPT/ADD */}
             <div style={{
-              background: 'linear-gradient(transparent, rgba(0,0,0,0.78) 50%)',
-              padding: '14px 28px 36px',
+              background: detecting ? 'linear-gradient(transparent, rgba(0,0,0,0.75) 50%)' : 'linear-gradient(transparent, var(--bg) 60%)',
+              padding: '18px 24px 32px',
               display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
               pointerEvents: 'auto',
             }}>
+              {/* Letter circle */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LETTER</span>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: detecting ? 'rgba(255,255,255,0.45)' : 'var(--ink-faint)' }}>LETTER</span>
                 <div style={{
-                  width: 54, height: 54, borderRadius: '50%',
-                  background: currentLetter ? '#fff' : 'rgba(255,255,255,0.08)',
-                  border: '2px solid rgba(255,255,255,0.25)',
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: currentLetter ? (detecting ? '#fff' : 'var(--primary)') : (detecting ? 'rgba(255,255,255,0.08)' : 'var(--surface)'),
+                  border: detecting ? '2px solid rgba(255,255,255,0.2)' : '2px solid var(--line)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: currentLetter ? 'var(--shadow)' : 'none',
                 }}>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: currentLetter ? '#000' : 'rgba(255,255,255,0.3)', direction: 'rtl', lineHeight: 1 }}>
+                  <span style={{ fontSize: 20, fontWeight: 700, direction: 'rtl', lineHeight: 1, fontFamily: currentLetter ? 'var(--font-urdu)' : 'inherit',
+                    color: currentLetter ? (detecting ? '#000' : 'var(--on-primary)') : (detecting ? 'rgba(255,255,255,0.3)' : 'var(--ink-faint)') }}>
                     {currentLetter || '—'}
                   </span>
                 </div>
               </div>
 
+              {/* Start/Stop */}
               {!detecting ? (
                 <button onClick={startDetection} style={{
-                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  width: 76, height: 76, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--primary)', border: '4px solid var(--green-soft)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 20px oklch(0.74 0.16 158/0.4)',
                 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#000', letterSpacing: '0.06em' }}>START</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--on-primary)', letterSpacing: '0.06em' }}>START</span>
                 </button>
               ) : (
                 <button onClick={handleStop} style={{
-                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                  background: '#fff', border: '5px solid rgba(255,255,255,0.35)',
+                  width: 76, height: 76, borderRadius: '50%', flexShrink: 0,
+                  background: '#fff', border: '4px solid rgba(255,255,255,0.3)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.45)',
                 }}>
-                  <span style={{ width: 24, height: 24, background: '#000', borderRadius: 4, display: 'block' }} />
+                  <span style={{ width: 22, height: 22, background: '#111', borderRadius: 4, display: 'block' }} />
                 </button>
               )}
 
+              {/* Accept/Add circle */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: detecting ? 'rgba(255,255,255,0.45)' : 'var(--ink-faint)' }}>
                   {currentWord ? 'ADD' : 'ACCEPT'}
                 </span>
                 <button
                   onClick={currentWord ? addWord : acceptLetter}
                   disabled={!currentLetter && !currentWord}
                   style={{
-                    width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
-                    background: (currentLetter || currentWord) ? '#fff' : 'rgba(255,255,255,0.08)',
-                    border: '2px solid rgba(255,255,255,0.25)',
+                    width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+                    background: (currentLetter || currentWord) ? (detecting ? '#fff' : 'var(--primary)') : (detecting ? 'rgba(255,255,255,0.08)' : 'var(--surface)'),
+                    border: detecting ? '2px solid rgba(255,255,255,0.2)' : '2px solid var(--line)',
                     cursor: (currentLetter || currentWord) ? 'pointer' : 'default',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: (currentLetter || currentWord) ? '#000' : 'rgba(255,255,255,0.3)',
+                    boxShadow: (currentLetter || currentWord) ? 'var(--shadow)' : 'none',
+                    color: (currentLetter || currentWord) ? (detecting ? '#000' : 'var(--on-primary)') : (detecting ? 'rgba(255,255,255,0.3)' : 'var(--ink-faint)'),
                   }}
                 >
                   <span style={{ fontSize: 20, lineHeight: 1 }}>{currentWord ? '＋' : '✓'}</span>
