@@ -208,10 +208,42 @@ To learn PSL signs, visit the **Learn** page — hover any letter card to see it
 
 ## Model Details
 
-- **Architecture:** Dense neural network trained on MediaPipe hand keypoints
-- **Input:** 63 keypoint values (21 landmarks × XYZ) per frame
-- **Labels:** 37 PSL alphabet classes + 5 word classes
-- **Training data:** Custom-collected PSL keypoint dataset with confusion-matrix-guided refinement
+Two separate models are trained and served — one for alphabet letters, one for words. Both share the same input pipeline.
+
+### Input pipeline
+
+MediaPipe Holistic extracts 21 hand landmarks per frame, each carrying `[x, y, confidence]` (63 values total). Confidence scores are discarded, leaving **42 features per frame** (21 landmarks × XY pixel coordinates). These are standardised with a `StandardScaler` before being passed to the model.
+
+### Alphabet model — 37 classes
+
+| Layer | Units | Activation |
+|-------|-------|-----------|
+| Dense | 120 | ReLU |
+| Dropout | 0.3 | — |
+| Dense | 64 | ReLU |
+| Dropout | 0.3 | — |
+| Dense (output) | 37 | Softmax |
+
+- Optimizer: Adam · Loss: Categorical cross-entropy
+- Train/test split: 80 / 20 · Epochs: 25 · Batch size: 1
+
+### Word model — 5 classes
+
+| Layer | Units | Activation |
+|-------|-------|-----------|
+| Dense | 256 | ReLU |
+| Dropout | 0.3 | — |
+| Dense | 128 | ReLU |
+| Dropout | 0.3 | — |
+| Dense | 64 | ReLU |
+| Dense (output) | 5 | Softmax |
+
+- Optimizer: Adam · Loss: Categorical cross-entropy
+- Train/test split: 80 / 20 · Epochs: 50 · Batch size: 32
+
+### Training data
+
+Custom-collected PSL keypoint dataset captured via MediaPipe, stored in SQLite. Alphabet dataset uses `alphabetDataset` table; word dataset uses `wordDataset`. Confusion-matrix analysis was used iteratively to identify and correct misclassified letter pairs.
 
 ---
 
