@@ -4,18 +4,30 @@ A real-time Pakistani Sign Language (PSL) recognition system that translates han
 
 ---
 
-## Screenshots
+## Application Overview
 
-| | |
-|---|---|
-| **Home** | **Dashboard** |
-| ![Home](frontend/public/images/screenshots/home.png) | ![Dashboard](frontend/public/images/screenshots/dashboard.png) |
-| **Sign Detector** | **Learn** |
-| ![Sign Detector](frontend/public/images/screenshots/sign.png) | ![Learn](frontend/public/images/screenshots/learn.png) |
-| **Live Learn** | **Live Quiz** |
-| ![Live Learn](frontend/public/images/screenshots/live-learn.png) | ![Live Quiz](frontend/public/images/screenshots/live-quiz.png) |
-| **Dictionary** | |
-| ![Dictionary](frontend/public/images/screenshots/dictionary.png) | |
+### Landing Page
+
+![LinguaSign Home](frontend/public/images/screenshots/home.png)
+
+The landing page introduces LinguaSign to new visitors with a bold hero section — a full-bleed animated background with a live hand-skeleton preview demonstrating PSL detection in real time. The headline communicates the core value proposition immediately: *Sign it. See it translated, instantly.* Below the fold, trust indicators display the system's reach (users, detections, accuracy), followed by a feature highlights section and navigation links to the core platform modules. The top navigation provides direct access to all major sections — Detect, Learn, Contact, and Feedback — with a persistent theme toggle and a prominent **Try the Detector** call-to-action. The overall aesthetic uses a dark base with a green accent system, reflecting the PSL branding throughout.
+
+---
+
+### Sign Detector
+
+![Sign Detector](frontend/public/images/screenshots/sign.png)
+
+The Sign Detector is the core feature of LinguaSign. Upon starting a session, the system opens the user's webcam via the FastAPI backend and begins streaming a live MJPEG feed. A MediaPipe-powered model analyses each frame in real time, extracting 63 hand keypoints (21 landmarks × XYZ coordinates) and passing them through a trained dense neural network to classify the current PSL hand sign. The detected letter is displayed immediately in the **Detected Letter** panel. Users can then:
+
+- **Accept a letter** to append it to the active word being composed
+- **Add a word to the sentence** once the full word is spelled out
+- **Speak the sentence** to trigger pre-recorded Urdu audio playback for each word
+- **Remove individual words** by clicking them in the sentence panel
+- Switch to **Word Mode** for direct whole-word detection
+- Adjust the **Detection Speed** slider (300 ms – 3 s cooldown) to balance responsiveness against false positives
+
+The layout is split into a control panel on the left and the live camera feed on the right, keeping detection context and controls in the same view without context switching.
 
 ---
 
