@@ -23,6 +23,7 @@ export const Gear    = (p: IconProps) => <S {...p}><circle cx="12" cy="12" r="3"
 export const User    = (p: IconProps) => <S {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></S>;
 export const Flame   = P('M12 3c1 3-1.5 4.5-1.5 7A3.5 3.5 0 0 0 16 12c1.5 2 .5 8-4 8s-6-4-4.5-7C8.5 11 9 9 8.5 7.5 10 8 11 6 12 3Z');
 export const Check   = P('M5 12.5 10 17.5 19 7');
+export const Heart   = P('M12 21l-8.5-8.5a5 5 0 0 1 7.07-7.07L12 6.93l1.43-1.5a5 5 0 0 1 7.07 7.07Z');
 export const X       = P('M6 6l12 12M18 6 6 18');
 export const Mic     = (p: IconProps) => <S {...p}><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></S>;
 export const Sun     = (p: IconProps) => <S {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></S>;
