@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fredoka, Plus_Jakarta_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from "./components/AuthProvider";
 
 const fredoka = Fredoka({
   weight: ['400','500','600','700'],
@@ -37,7 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fredoka.variable} ${plusJakarta.variable} ${notoNastaliq.variable} h-full`}>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

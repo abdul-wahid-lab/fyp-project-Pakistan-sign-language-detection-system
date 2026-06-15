@@ -249,7 +249,9 @@ Custom-collected PSL keypoint dataset captured via MediaPipe, stored in SQLite. 
 
 ## License
 
-Developed as a Final Year Project (FYP).
+This project is licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2026 Abdul Wahid
 
 ---
 

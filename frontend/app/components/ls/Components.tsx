@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '../ThemeProvider';
 import * as I from './Icons';
 
@@ -289,6 +290,57 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ── Session avatar / auth button ───────────────────────── */
+function TopBarUser() {
+  const { data: session, status } = useSession();
+  const [open, setOpen] = useState(false);
+
+  if (status === 'loading') return <div style={{ width: 40, height: 40, borderRadius: 999, background: 'var(--surface-2)' }} />;
+
+  if (!session) {
+    return (
+      <Link href="/auth" className="btn btn-primary btn-sm" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        Sign in
+      </Link>
+    );
+  }
+
+  const name = session.user?.name ?? 'User';
+  const image = session.user?.image;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+        {image
+          ? <img src={image} alt={name} width={40} height={40} referrerPolicy="no-referrer" style={{ borderRadius: 999, display: 'block', boxShadow: 'var(--shadow-sm)' }} />
+          : <Avatar name={name} size={40} ring />
+        }
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', right: 0, top: 48, background: 'var(--surface)', border: '1px solid var(--line)',
+          borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-md)', minWidth: 200, zIndex: 50, overflow: 'hidden',
+        }} onClick={() => setOpen(false)}>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
+            <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 2 }}>{name}</p>
+            <p style={{ fontSize: 13, color: 'var(--ink-faint)' }}>{session.user?.email}</p>
+          </div>
+          <button onClick={() => signOut({ callbackUrl: '/' })} style={{
+            width: '100%', padding: '12px 16px', textAlign: 'left', background: 'none', border: 'none',
+            color: 'var(--ink-soft)', fontSize: 14.5, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+            transition: 'background 0.15s',
+          }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}
+          >
+            <I.ArrowLeft size={16} /> Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Top bar (used inside app pages) ───────────────────── */
 export function TopBar({ title, sub, action, titleHref }: { title: string; sub?: string; action?: React.ReactNode; titleHref?: string }) {
   return (
@@ -304,7 +356,7 @@ export function TopBar({ title, sub, action, titleHref }: { title: string; sub?:
         <button className="ls-icon-btn ls-topbar-bell" title="Notifications"><I.Bell size={21} /></button>
         <LsThemeToggle />
         {action}
-        <span className="ls-topbar-avatar"><Avatar size={40} /></span>
+        <span className="ls-topbar-avatar"><TopBarUser /></span>
       </div>
     </div>
   );
@@ -317,6 +369,7 @@ const PUB_LINKS = [
   { href: '/contact',       label: 'Contact' },
   { href: '/feedback',      label: 'Feedback' },
   { href: '/dictionary',    label: 'Dictionary' },
+  { href: '/donate',        label: 'Donate' },
 ];
 
 export function LsPublicNav({ active }: { active?: string }) {
