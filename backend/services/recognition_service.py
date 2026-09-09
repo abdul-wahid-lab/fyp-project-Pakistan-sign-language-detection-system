@@ -17,7 +17,7 @@ def get_latest_keypoint_file() -> Optional[str]:
     ]
     if not entries:
         return None
-    return max(entries, key=lambda e: e.stat().st_mtime).name  # latest by write time
+    return max(entries, key=lambda e: e.stat().st_mtime).name
 
 
 def predict(mode: int) -> str:
@@ -29,7 +29,6 @@ def predict(mode: int) -> str:
     filepath = os.path.join(settings.KEYPOINTS_DIR, filename)
 
     try:
-        # Debug: read keypoint and log confidence
         js = json.loads(open(filepath).read())
         for items in js['people']:
             hr = items["hand_right_keypoints_2d"]

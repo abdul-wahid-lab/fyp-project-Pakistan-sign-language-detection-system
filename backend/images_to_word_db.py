@@ -1,22 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Process a word image dataset and insert normalized keypoints into wordDataset.
-Uses the exact same pipeline as the alphabet model (right hand, scale + center).
-
-Dataset structure expected:
-    <dataset_root>/
-        <word_label>/
-            image1.jpg
-            image2.jpg
-            ...
-
-Run from backend/ directory:
-    python images_to_word_db.py <path_to_dataset_root>
-
-Example:
-    python images_to_word_db.py D:/my_word_dataset
-"""
-
 import os
 import sys
 import math
@@ -42,7 +23,6 @@ def get_hand_kp(hand_landmarks, w, h):
 
 
 def extract_features(image_path, hands_detector):
-    # cv2.imread fails on Windows with non-ASCII (e.g. Arabic) paths
     raw = np.fromfile(image_path, dtype=np.uint8)
     img = cv2.imdecode(raw, cv2.IMREAD_COLOR)
     if img is None:
@@ -68,8 +48,6 @@ def extract_features(image_path, hands_detector):
     r_conf = sum(rhand_kp[i] for i in range(2, len(rhand_kp), 3))
     l_conf = sum(lhand_kp[i] for i in range(2, len(lhand_kp), 3))
 
-    # In frontal images the person's right hand is on the camera's left side,
-    # so MediaPipe labels it "Left". Swap when right slot is empty but left is strong.
     if r_conf <= 10 and l_conf > 10:
         rhand_kp = lhand_kp
         r_conf = l_conf
@@ -77,8 +55,7 @@ def extract_features(image_path, hands_detector):
     if r_conf <= 10:
         return None
 
-    # Same normalization as alphabet_recognition.py
-    hand_points = helper.removePoints(rhand_kp)   # strips confidence → 42 floats
+    hand_points = helper.removePoints(rhand_kp)
 
     p1 = [hand_points[0], hand_points[1]]
     p2 = [hand_points[18], hand_points[19]]
@@ -86,10 +63,10 @@ def extract_features(image_path, hands_detector):
     if distance == 0:
         return None
 
-    scale.scalePoints(hand_points, distance)       # matches alphabet pipeline exactly
-    results, _ = move.centerPoints(hand_points)    # wrist anchored to (150, 150)
+    scale.scalePoints(hand_points, distance)
+    results, _ = move.centerPoints(hand_points)
 
-    return results                                 # 42 floats
+    return results
 
 
 def ensure_word_table(conn):
@@ -120,7 +97,6 @@ def build_insert_sql():
 
 
 def cols_to_row(features, label):
-    # features = [x1,y1,x2,y2,...,x21,y21] interleaved → split into x list and y list
     x_vals = features[0::2]
     y_vals = features[1::2]
     return x_vals + y_vals + [label]

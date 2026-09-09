@@ -1,13 +1,3 @@
-"""
-Extract the first image from each word dataset label folder and save it to
-frontend/public/images/words/ as a numbered PNG (1.png–N.png).
-
-Labels are sorted by Unicode code point (matches sklearn LabelEncoder order).
-
-Run from backend/ directory:
-    python extract_word_images.py
-"""
-
 import os
 import sys
 import io

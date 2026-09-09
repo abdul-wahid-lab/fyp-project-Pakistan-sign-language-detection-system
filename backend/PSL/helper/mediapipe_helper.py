@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-MediaPipe-based keypoint capture module.
-Replaces OpenPose subprocess with MediaPipe Holistic running in a background thread.
-Writes JSON files in OpenPose-compatible format so the rest of the pipeline works unchanged.
-"""
-
 import cv2
 import mediapipe as mp
 import json
@@ -16,42 +9,33 @@ mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 
-_latest_frame = None          # JPEG bytes of the most recent annotated frame
+_latest_frame = None
 _frame_lock = threading.Lock()
 
-# OpenPose BODY_18 to MediaPipe pose landmark index mapping.
-# Special values None mean the point must be computed as a midpoint.
-# Entry format: (mp_index_or_None, mp_index2_or_None)
-# If mp_index2 is given, the OpenPose point = midpoint of mp_index and mp_index2.
 _POSE_MAP = [
-    (0, None),    # 0  Nose
-    (11, 12),     # 1  Neck (midpoint of shoulders)
-    (12, None),   # 2  RShoulder
-    (14, None),   # 3  RElbow
-    (16, None),   # 4  RWrist
-    (11, None),   # 5  LShoulder
-    (13, None),   # 6  LElbow
-    (15, None),   # 7  LWrist
-    (23, 24),     # 8  MidHip (midpoint of hips)
-    (24, None),   # 9  RHip
-    (26, None),   # 10 RKnee
-    (28, None),   # 11 RAnkle
-    (23, None),   # 12 LHip
-    (25, None),   # 13 LKnee
-    (27, None),   # 14 LAnkle
-    (5,  None),   # 15 REye
-    (2,  None),   # 16 LEye
-    (8,  None),   # 17 REar
-    (7,  None),   # 18 LEar
+    (0, None),
+    (11, 12),
+    (12, None),
+    (14, None),
+    (16, None),
+    (11, None),
+    (13, None),
+    (15, None),
+    (23, 24),
+    (24, None),
+    (26, None),
+    (28, None),
+    (23, None),
+    (25, None),
+    (27, None),
+    (5,  None),
+    (2,  None),
+    (8,  None),
+    (7,  None),
 ]
 
 
 def _get_pose_keypoints(pose_landmarks, frame_w, frame_h):
-    """
-    Convert MediaPipe pose landmarks to OpenPose 19-point flat array
-    [x0, y0, c0, x1, y1, c1, ...] in pixel coordinates.
-    Returns 57 floats (19 points x 3).
-    """
     if pose_landmarks is None:
         return [0.0] * 57
 
@@ -60,13 +44,11 @@ def _get_pose_keypoints(pose_landmarks, frame_w, frame_h):
 
     for idx_a, idx_b in _POSE_MAP:
         if idx_b is None:
-            # Direct mapping
             p = lm[idx_a]
             x = p.x * frame_w
             y = p.y * frame_h
             c = p.visibility
         else:
-            # Midpoint
             pa = lm[idx_a]
             pb = lm[idx_b]
             x = ((pa.x + pb.x) / 2) * frame_w
@@ -78,12 +60,6 @@ def _get_pose_keypoints(pose_landmarks, frame_w, frame_h):
 
 
 def _get_hand_keypoints(hand_landmarks, frame_w, frame_h):
-    """
-    Convert MediaPipe hand landmarks to OpenPose flat array
-    [x0, y0, c0, x1, y1, c1, ...] in pixel coordinates.
-    Returns 63 floats (21 points x 3).
-    MediaPipe and OpenPose share the same 21-landmark hand ordering.
-    """
     if hand_landmarks is None:
         return [0.0] * 63
 
@@ -94,7 +70,6 @@ def _get_hand_keypoints(hand_landmarks, frame_w, frame_h):
 
 
 def _save_keypoints_json(pose_kp, hand_right_kp, hand_left_kp, output_path):
-    """Save keypoints as an OpenPose-compatible JSON file."""
     data = {
         "version": 1.3,
         "people": [
@@ -116,11 +91,6 @@ def _save_keypoints_json(pose_kp, hand_right_kp, hand_left_kp, output_path):
 
 
 def _capture_loop(output_dir, stop_event, camera_index=0):
-    """
-    Background thread: reads webcam frames, runs MediaPipe Holistic,
-    and writes one JSON file per frame to output_dir.
-    Files are named like OpenPose: 000000000001_keypoints.json, etc.
-    """
     cap = cv2.VideoCapture(camera_index)
     if not cap.isOpened():
         print('ERROR: Cannot open camera', camera_index)
@@ -151,7 +121,6 @@ def _capture_loop(output_dir, stop_event, camera_index=0):
                                  os.path.join(output_dir, filename))
             frame_count += 1
 
-            # Draw landmarks on frame for MJPEG stream
             annotated = frame.copy()
             if results.pose_landmarks:
                 mp_drawing.draw_landmarks(
@@ -179,7 +148,6 @@ def _capture_loop(output_dir, stop_event, camera_index=0):
             with _frame_lock:
                 _latest_frame = jpeg.tobytes()
 
-            # ~20 fps cap to avoid flooding disk
             time.sleep(0.05)
 
     cap.release()
@@ -187,16 +155,13 @@ def _capture_loop(output_dir, stop_event, camera_index=0):
         _latest_frame = None
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
-
 _capture_thread = None
 _stop_event = None
 
 
 def start_capture(output_dir='Keypoints', camera_index=0):
-    """Start MediaPipe keypoint capture in a background thread."""
     global _capture_thread, _stop_event
-    stop_capture()  # ensure any previous thread is stopped
+    stop_capture()
     os.makedirs(output_dir, exist_ok=True)
     _stop_event = threading.Event()
     _capture_thread = threading.Thread(
@@ -209,7 +174,6 @@ def start_capture(output_dir='Keypoints', camera_index=0):
 
 
 def stop_capture():
-    """Stop the MediaPipe capture thread."""
     global _capture_thread, _stop_event
     if _stop_event:
         _stop_event.set()
