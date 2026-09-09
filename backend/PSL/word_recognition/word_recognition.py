@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Word recognition using the same pipeline as alphabet_recognition:
-right hand only, scale + centerPoints normalization, 42 features.
-"""
-
 import PSL.helper.helperFunc as helper
 import PSL.helper.scale as scale
 import PSL.helper.move as move

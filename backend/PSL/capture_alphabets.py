@@ -1,7 +1,3 @@
-
-# -*- coding: utf-8 -*-
-
-# local imports
 import PSL.helper.db_helper as dbh
 import PSL.helper.helperFunc as helper
 import PSL.helper.move as move
@@ -10,7 +6,6 @@ import PSL.helper.plot as plot
 import PSL.retrain as retrain
 import PSL.helper.mediapipe_helper as mediapipe_helper
 
-# system imports
 import cv2
 import math
 import os
@@ -19,7 +14,6 @@ from matplotlib import pyplot as plt
 import time
 from datetime import datetime
 
-# for error handling
 import errno, stat, shutil
 from distutils.dir_util import copy_tree
 import sys, signal
@@ -27,9 +21,6 @@ import sys, signal
 import eel
 
 
-"""
-Handling Errors While removing temp folders
-"""     
 def signal_handler(signal, frame):
     mediapipe_helper.stop_capture()
     shutil.rmtree("Keypoints", ignore_errors=True, onerror=handleRemoveReadonly)
@@ -40,11 +31,10 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-# if folder is read only raise exception
 def handleRemoveReadonly(func, path, exc):
   excvalue = exc[1]
   if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-      os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+      os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO)
       func(path)
   else:
       raise Exception
@@ -70,7 +60,6 @@ def plotPose(posePoints, handRightPoints, handLeftPoints):
     frame = cv2.imread(background)
 
     count = 0
-    # Draw Skeleton
     for pair in POSE_PAIRS:
         partA = pair[0]
         partB = pair[1]
@@ -104,22 +93,18 @@ def plotPose(posePoints, handRightPoints, handLeftPoints):
             cv2.circle(frame, handLeftPoints[partB], 5, (255, 255, 255), thickness=4, lineType=cv2.FILLED)
         count += 1
 
-    #    frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
     return frame
 
 
 remfileNames = []
-capture_mode = 0  # 0 = alphabet, 1 = word
+capture_mode = 0
 
 @eel.expose
 def capture_alphabet_dataset(sec):
 
     global remfileNames, capture_mode
     capture_mode = 0
-    
-    """
-    ----------------------Start MediaPipe capture----------------------
-    """
+
     dirName = 'Keypoints'
     init_file = 'PSL\\000000000000_keypoints.json'
 
@@ -134,146 +119,66 @@ def capture_alphabet_dataset(sec):
 
     mediapipe_helper.start_capture(output_dir=dirName)
 
-    
-    
-    """
-    ----------------------Live View----------------------
-    """
-    
-#    shutil.copy('PSL\\000000000000_keypoints.json', 'Keypoints')
-#    filePlotName = '000000000000_keypoints.json'
     t = time.time() + sec
     while time.time() <= t:
         eel.sleep(0.05)
-#        for entry in os.scandir('Keypoints'):
-#            if entry.is_file():
-#                if os.path.splitext(entry)[1] == ".json":
-#                    filePlotName = entry.name
-#    
-#        try:
-#            js = json.loads(open('Keypoints\\' + filePlotName).read())
-#        except ValueError:
-#            print('Decoding JSON has failed')
-#            pass
-#    
-#        # extract 'hand_right_keypoints_2d' from json file
-#        for items in js['people']:
-#            pose = items["pose_keypoints_2d"]
-#            handRight = items["hand_right_keypoints_2d"]
-#            handLeft = items["hand_left_keypoints_2d"]
-#    
-#        pose_points = helper.removePoints(pose)
-#        posePoints = helper.join_points(pose_points)
-#    
-#        #  function to remove confidence points
-#        hand_right_Points = helper.removePoints(handRight)
-#        handRightPoints = helper.join_points(hand_right_Points)
-#    
-#        hand_left_points = helper.removePoints(handLeft)
-#        handLeftPoints = helper.join_points(hand_left_points)
-#    
-#        frame = plotPose(posePoints, handRightPoints, handLeftPoints)
-#    
-#        cv2.imwrite('gui\\temp_images\\' + filePlotName + '.jpg', frame)
-#        # reset image
-#        frame = cv2.imread("PSL\\BLACK_background.jpg")
-#        print("saad")
-#        eel.get_fileName(filePlotName)
-#        filePlotName = ''
 
-
-#    eel.sleep(sec)
-    #  Stop MediaPipe capture
     mediapipe_helper.stop_capture()
-    
-    
-    """
-    ---------------------- Auto Remove files----------------------
-    """
+
     conf_thershold = 10
     fileNames = []
-    #scan temporary folder
     for entry in os.scandir('Keypoints'):
-        # store the name if entry is file and file is of ext .json
         if entry.is_file():
             if os.path.splitext(entry)[1] == ".json":
                 fileNames.append(entry.name)
-                
-    # traverse fileNames[]
+
     for x in range(len(fileNames)):
-        # load each file from fileName[]
         js = json.loads(open('Keypoints\\' + fileNames[x]).read())
-        # extract 'hand_right_keypoints_2d' from json file
         for items in js['people']:
             handRight = items["hand_right_keypoints_2d"]
-        
-        # extract confidence points
+
         confPoints = helper.confidencePoints(handRight)
-        # add all confidence points
         confidence = helper.confidence(confPoints)
         print(confidence)
-        # remove file if confidence is less than threshold
         if confidence < conf_thershold:
             os.remove('Keypoints\\' + fileNames[x])
 
-
-    """
-    ----------------------plot and save----------------------
-    """   
     background = 'big_background.png'
     fileNames = []
-    #scan temporary folder
     for entry in os.scandir('Keypoints'):
-        # store the name if entry is file and file is of ext .json
         if entry.is_file():
             if os.path.splitext(entry)[1] == ".json":
                 fileNames.append(entry.name)
-                
-    
-    # read background image
+
     frame = cv2.imread(background)
-    
+
     i=1;
-    
+
     for x in range(len(fileNames)):
-        # load each file from fileName[]
         js = json.loads(open('Keypoints\\' + fileNames[x]).read())
-        # extract 'hand_right_keypoints_2d' from json file
         for items in js['people']:
             handRight = items["hand_right_keypoints_2d"]
-        
-        #  function to remove confidence points
+
         handPoints = helper.removePoints(handRight)
-         
+
         p1 = [handPoints[0], handPoints[1]]
         p2 = [handPoints[18], handPoints[19]]
         distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
-        
+
         Result,Points = scale.dummy_scalePoints(handPoints,distance)
-       
-        handRightResults,handRightPoints = move.dummy_centerPoints(Result)  
-    
-        
-        
-        frame = plot.plot_dataset(handRightPoints,'black') 
-        
+
+        handRightResults,handRightPoints = move.dummy_centerPoints(Result)
+
+        frame = plot.plot_dataset(handRightPoints,'black')
+
         cv2.imwrite('gui\\captured_images\\' + str(i) + '.jpg', frame)
         i+=1
-        
-        
-        """
-        ----------------------get ref to delete files----------------------
-        """ 
-        
+
         for entry in os.scandir('Keypoints'):
             if entry.is_file():
                 if os.path.splitext(entry)[1] == ".json":
                     remfileNames.append(entry.name)
-        
-        
-        """
-        ----------------------end capture_alphabet_dataset(sec)----------------------
-        """  
+
 
 @eel.expose
 def getFileCount():
@@ -288,17 +193,15 @@ def getFileCount():
 @eel.expose
 def delete_Image(i):
     global remfileNames
-    
+
     print(remfileNames)
-    
+
     try:
-        os.remove('Keypoints\\' + remfileNames[i-1])            
+        os.remove('Keypoints\\' + remfileNames[i-1])
         os.remove('gui\\captured_images\\'+ str(i) + '.jpg')
     except:
         print("file not found")
         pass
-
-
 
 
 @eel.expose
@@ -327,7 +230,6 @@ def capture_word_dataset(sec):
 
     mediapipe_helper.stop_capture()
 
-    # Remove files with low right-hand confidence
     conf_thershold = 10
     fileNames = []
     for entry in os.scandir('Keypoints'):
@@ -345,7 +247,6 @@ def capture_word_dataset(sec):
         if confidence < conf_thershold:
             os.remove('Keypoints\\' + fileNames[x])
 
-    # Plot pose + both hands and save preview images
     background = 'big_background.png'
     fileNames = []
     for entry in os.scandir('Keypoints'):
@@ -424,15 +325,3 @@ def db_train():
 @eel.expose
 def db_word_train():
     retrain.re_train(1)
-
-
-
-
-
-
-
-
-
-
-
-

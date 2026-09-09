@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  4 18:55:38 2019
-
-"""
-
 import sqlite3
 import numpy as np
 import pickle
@@ -41,14 +35,10 @@ class EpochBar(Callback):
               f"  val_loss: {val_loss:.4f}  val_acc: {val_acc:.4f}")
 
 
-def train_alphabets():    
-    """
-    extracting data from db
-    """
-    connection = sqlite3.connect("data\\db\\main_dataset.db") 
+def train_alphabets():
+    connection = sqlite3.connect("data\\db\\main_dataset.db")
     crsr = connection.cursor()
-    
-    # extracting x and y points
+
     sql = 'SELECT x1,y1'
     for x in range(2,22):
         sql = sql + ',x'+str(x)+',y'+str(x)
@@ -59,17 +49,14 @@ def train_alphabets():
     features=[]
     for x in feature_res:
         features.append(x)
-    
-    # extracting labels
+
     crsr.execute('SELECT label FROM alphabetDataset WHERE 1')
     label_res = crsr.fetchall()
     labels=[]
     for x in label_res:
         labels.append(x)
-        
-    #creating labelEncoder
+
     le = preprocessing.LabelEncoder()
-    # Converting string labels into numbers.
     label_encoded=le.fit_transform(labels)
 
     num_classes = len(set(le.classes_))
@@ -82,11 +69,9 @@ def train_alphabets():
     X_test = scaler.transform(X_test)
     pickle.dump(scaler, open("data\\models\\alphabet_scaler.pkl", "wb"))
     pickle.dump(le, open("data\\models\\alphabet_label_encoder.pkl", "wb"))
-    
-    # Initialize the constructor
+
     model = Sequential()
-    
-    # Add an input layer 
+
     model.add(Dense(120, activation='relu', input_shape=(42,)))
     model.add(Dropout(0.3))
     model.add(Dense(64, activation='relu'))
@@ -96,21 +81,19 @@ def train_alphabets():
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
-                       
+
     history = model.fit(X_train, y_train, validation_split=0.20,
                         epochs=25, batch_size=1, verbose=0,
                         callbacks=[EpochBar()])
 
     model.save("data\\models\\alphabet_model.h5")
-    
+
     y_pred = model.predict(X_test)
     score = model.evaluate(X_test, y_test,verbose=1)
-    #
+
     print("\n%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
-    
-    # list all data in history
+
     print(history.history.keys())
-    # summarize history for accuracy
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
     plt.title('Accuracy vs Epoch')
@@ -118,20 +101,17 @@ def train_alphabets():
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
-    # summarize history for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    #plt.figure(figsize = (30,30))
     plt.show()
-    
-    
+
     print(model.summary())
     cm = confusion_matrix(y_test.argmax(axis=1), y_pred.argmax(axis=1))
-    
+
     import itertools
     plt.rcParams.update({'font.size': 10})
 
@@ -152,7 +132,7 @@ def train_alphabets():
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             val = format(cm[i, j], fmt)
             if normalize and cm[i, j] < 0.01:
-                continue  # skip near-zero cells to reduce clutter
+                continue
             plt.text(j, i, val, horizontalalignment="center", fontsize=7,
                      color="white" if cm[i, j] > thresh else "black")
 
@@ -174,13 +154,3 @@ def train_alphabets():
 
 if __name__ == "__main__":
     train_alphabets()
-
-
-
-
-
-
-
-
-
-

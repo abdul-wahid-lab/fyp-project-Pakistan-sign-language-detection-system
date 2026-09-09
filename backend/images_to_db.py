@@ -1,18 +1,3 @@
-"""
-Convert an image dataset to the training database.
-
-Folder structure expected:
-    dataset_path/
-        label_name/
-            image1.jpg
-            image2.jpg
-            ...
-
-Run from the backend/ directory:
-    python images_to_db.py --dataset path/to/your/dataset
-    python images_to_db.py --dataset path/to/your/dataset --clear
-"""
-
 import os
 
 import sys
@@ -35,7 +20,6 @@ DB_PATH = "data\\db\\main_dataset.db"
 
 
 def extract_keypoints(image_path):
-    """Run MediaPipe on one image, return flat [x1,y1,...,x21,y21] or None."""
     import numpy as np
     with open(image_path, 'rb') as f:
         data = np.frombuffer(f.read(), dtype=np.uint8)
@@ -59,11 +43,10 @@ def extract_keypoints(image_path):
         keypoints.append(lm.x * frame_w)
         keypoints.append(lm.y * frame_h)
 
-    return keypoints  # 42 values
+    return keypoints
 
 
 def normalize_keypoints(keypoints):
-    """Scale and center keypoints the same way the existing pipeline does."""
     p1 = [keypoints[0], keypoints[1]]
     p2 = [keypoints[18], keypoints[19]]
     distance = math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)

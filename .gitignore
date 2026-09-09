@@ -27,6 +27,14 @@ backend/data/psl_keypoints/
 backend/data/tts_cache/
 backend/Keypoints/
 
+# ── Runtime-generated data (contains user PII / local artifacts) ────────────
+backend/data/contacts.json
+backend/data/users.db
+backend/data/users.db-shm
+backend/data/users.db-wal
+backend/_insert_log.txt
+backend/*.mp4
+
 # ── Editor & IDE ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/

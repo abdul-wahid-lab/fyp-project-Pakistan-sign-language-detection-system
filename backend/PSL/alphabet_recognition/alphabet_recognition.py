@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 28 15:09:28 2019
-
-"""
-
 import PSL.helper.move as move
 import PSL.helper.helperFunc as helper
 import PSL.helper.scale as scale
@@ -32,9 +26,6 @@ def match_ann(fileName):
     if confidence > 10.2:
         handPoints = helper.removePoints(handRight)
 
-        """
-        experimenting with scaling 
-        """
         p1 = [handPoints[0], handPoints[1]]
         p2 = [handPoints[18], handPoints[19]]
         distance = math.sqrt( ((p1[0]-p2[0])**2)+((p1[1]-p2[1])**2) )
@@ -43,7 +34,7 @@ def match_ann(fileName):
 
         Result,Points = scale.scalePoints(handPoints,distance)
         handRightResults,handRightPoints = move.centerPoints(handPoints)
-        
+
         y_pred = model.predict(scaler.transform(np.array([handRightResults])), verbose=0)
 
         C = np.argmax(y_pred)

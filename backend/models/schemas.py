@@ -2,12 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 
 class CaptureRequest(BaseModel):
-    duration: Optional[int] = None  # seconds; None = continuous
+    duration: Optional[int] = None
 
 class MatchRequest(BaseModel):
-    mode: int = 1          # 0 = alphabet, 1 = word
-    speech: int = 0        # 0 = off, 1 = on
-    voice_mode: str = "offline"  # "edge" or "offline"
+    mode: int = 1
+    speech: int = 0
+    voice_mode: str = "offline"
 
 class PredictionResponse(BaseModel):
     label: str
@@ -18,4 +18,4 @@ class StatusResponse(BaseModel):
 
 class LabelRequest(BaseModel):
     label: str
-    mode: int = 1  # 0 = alphabet, 1 = word
+    mode: int = 1

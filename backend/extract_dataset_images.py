@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Extract the first image from each dataset label folder and copy it to the
-frontend public images directory as a numbered PNG file.
-
-Run from backend/ directory:
-    python extract_dataset_images.py
-
-Each label folder maps to its 1-based index in the sorted label list,
-matching the order used by the trained LabelEncoder (sklearn sorts alphabetically).
-"""
-
 import os
 import sys
 import io
@@ -25,7 +13,6 @@ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Sorted same way sklearn LabelEncoder sorts — by Unicode code point
 labels = sorted(
     d for d in os.listdir(DATASET_ROOT)
     if os.path.isdir(os.path.join(DATASET_ROOT, d))
